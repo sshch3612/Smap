@@ -1,12 +1,17 @@
-import ms from 'ms';
-import lunchtime from './lunchtime.js';
-import millisecondsUntil from './millisecondsUntil.js';
 
-export default function howLongUntilLunch(hours, minutes) {
-	// lunch is at 12.30
-	if (hours === undefined) hours = 12;
-	if (minutes === undefined) minutes = 30;
+import mapboxgl from "mapbox-gl";
+import { Scene } from "@antv/l7";
+import { Mapbox } from "@antv/l7-maps";
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-	var millisecondsUntilLunchTime = millisecondsUntil(lunchtime(hours, minutes));
-	return ms(millisecondsUntilLunchTime, { long: true });
+import { initMixin } from "./init";
+
+function Smap(options) {
+
+	this._init(options)
 }
+
+//初始化加载
+initMixin(Smap);
+//地图交互
+//测绘
