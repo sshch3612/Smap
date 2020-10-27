@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Add an animated icon to the map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="../lib/smap.umd.js"></script>
+    <link href="../lib/smap.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script>
+        var map = new Smap({
+            id: "map"
+        })
+        console.log(map, 88777);
+        let dataPoint = [];
+        // map.on("load", function () {
+        //     map.loadDynamicPoint({ id: "point" });
+        //     const turf = map.Turf;
+        //     map.takeCoordinates((data) => {
+        //         console.log(data, 888888);
+        //         dataPoint = turf.point(data);
+        //         console.log(dataPoint, 6666);
+        //         map.addPointLayer({ id: 'test', image: 'point', data: dataPoint });
+        //     })
+        // })
+
+
+    </script>
+
+</body>
+
+</html>

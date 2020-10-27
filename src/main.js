@@ -1,10 +1,11 @@
 
-import mapboxgl from "mapbox-gl";
-import { Scene } from "@antv/l7";
-import { Mapbox } from "@antv/l7-maps";
-import 'mapbox-gl/dist/mapbox-gl.css';
+
+// import { Scene } from "@antv/l7";
+// import { Mapbox } from "@antv/l7-maps";
+
 
 import { initMixin } from "./init";
+import  initTurf  from "./util";
 
 function Smap(options) {
 
@@ -15,3 +16,7 @@ function Smap(options) {
 initMixin(Smap);
 //地图交互
 //测绘
+
+//工具函数
+initTurf(Smap);
+export default Smap;
