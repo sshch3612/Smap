@@ -272,12 +272,18 @@ export const interaction = (Smap) => {
      * 1、收集点数据
      * 2、画线、画点、标注操作
      * 3、事件处理
+     * 4、增加周期事件 开始绘制、结束绘制、全部删除、
      */
-    Smap.prototype.ranging = function () {
+    Smap.prototype.ranging = function ({ onStart = function () { }, onEnd = function () { } } = {}, onDelete = function () { }, onRevoke = function () { }) {
 
+
+
+        const exposed = {};
         const pointCollectInstance = new PointCollect();
         const markerCollectInstance = new MarkerCollect();
         const markerTextCollectInstance = new MarkerCollect();
+
+        exposed.data = pointCollectInstance.collectionPoints;
         // 初始化鼠标移动的点
         let movePoint = null;
 
@@ -339,7 +345,8 @@ export const interaction = (Smap) => {
             const { lng, lat } = e.lngLat;
             const movepoint = [lng, lat];
             renderLine([...pointCollectInstance.collectionPoints, movepoint]);
-
+            // 撤销上一步
+            onRevoke(exposed);
         }
 
         const handleMove = (e) => {
@@ -359,7 +366,8 @@ export const interaction = (Smap) => {
             this.smap.removeLayer(`${uuid}-line`);
             markerCollectInstance.Empty();
             markerTextCollectInstance.Empty();
-
+            // 删除回调
+            onDelete(exposed);
         }
 
         const handlecomplete = (e) => {
@@ -373,6 +381,8 @@ export const interaction = (Smap) => {
             const txt = len ? `${Math.round(len * 100) / 100}km` : "起点";
             markerTextCollectInstance.collectPush({ offset: [0, -24], lnglat: [lng, lat], element: MarkerCollect.createMarkerElement({ text: txt, icon: require('./assets/destroy.png'), iconClick: deleteAll }), target: this.smap });
             renderLine(pointCollectInstance.collectionPoints);
+            // 结束时回调
+            onEnd(exposed);
         }
         const cancelAllevent = () => {
             this.smap.off("click", handleClick);
@@ -380,8 +390,11 @@ export const interaction = (Smap) => {
             this.smap.off("contextmenu", handleRightClick);
         }
 
-        this.smap.on('click', handleClick);
 
+        this.smap.on('click', handleClick);
+        // 绘制开始回调
+        exposed.event = { type: "click", fn: handleClick };
+        onStart(exposed);
     }
 
 }
