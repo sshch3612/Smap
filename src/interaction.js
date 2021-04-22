@@ -1,4 +1,5 @@
 import mapboxgl from "mapbox-gl";
+import { addLayerToGroup } from "./layergroups";
 import { lineString } from "@turf/helpers";
 import length from "@turf/length";
 
@@ -85,6 +86,66 @@ export const interaction = (Smap) => {
     }
 
     /**
+     * 设置geojson图层数据源
+     * @param {*} id
+     * @param {*} data
+     * @returns  false 
+     */
+    Smap.prototype.setGeojsonSource = function (id, data) {
+
+        const source = this.smap.getSource(id);
+        if (source) {
+            source.setData(data);
+            return undefined;
+        }
+        const geojson = {
+            "type": "FeatureCollection",
+            "features": []
+        };
+        const sourceData = {
+            type: "geojson",
+            data: data || geojson
+        }
+        this.smap.addSource(id, sourceData);
+        return id;
+    }
+
+    /**
+     * 设置点图层
+     * 
+    */
+    Smap.prototype.setPointLayer = function (option = { id, image, minZoom, maxZoom, sourceid }, callback) {
+        const { id, image, minZoom, maxZoom, data } = option;
+        const layerData = {
+            id: id,
+            type: "symbol",
+            source: sourceid,
+            paint: {
+                "text-color": "#117170",
+            },
+            minzoom: minZoom || 0,
+            maxZoom: maxZoom || 22,
+            layout: {
+                "icon-allow-overlap": true,
+                "icon-image": image,
+                "icon-size": [
+                    "interpolate",
+                    ["linear"], ["zoom"],
+                    9, 1,
+                    14, 1
+                ],
+            }
+        };
+        return layerData;
+    }
+
+    Smap.prototype.addLayer = function (groupId, layer, beforeId, callback) {
+        addLayerToGroup(this.smap, groupId, layer, beforeId);
+        if (callback) {
+            callback(this.smap, layer.id);
+        }
+    }
+    /**
      * 添加点图层
      * 
     */
@@ -130,12 +191,12 @@ export const interaction = (Smap) => {
             callback(this.smap, id);
         } else {
             //默认交互
-            this.smap.on("click", id, e => {
-                const feature = e.features[0];
-                new Popup({ closeButton: false }).setLngLat(feature.geometry.coordinates)
-                    .setText(`${feature.properties.name}`)
-                    .addTo(map);
-            });
+            // this.smap.on("click", id, e => {
+            //     const feature = e.features[0];
+            //     new Popup({ closeButton: false }).setLngLat(feature.geometry.coordinates)
+            //         .setText(`${feature.properties.name}`)
+            //         .addTo(map);
+            // });
         }
     }
     /** 
@@ -274,7 +335,7 @@ export const interaction = (Smap) => {
      * 3、事件处理
      * 4、增加周期事件 开始绘制、结束绘制、全部删除、
      */
-    Smap.prototype.ranging = function ({ onStart = function () { }, onEnd = function () { } } = {}, onDelete = function () { }, onRevoke = function () { }) {
+    Smap.prototype.ranging = function ({ draggable = true, onStart = function () { }, onDrag = function () { }, onDragEnd = function () { }, onEnd = function () { } } = {}, onDelete = function () { }, onRevoke = function () { }) {
 
 
 
@@ -383,6 +444,10 @@ export const interaction = (Smap) => {
             renderLine(pointCollectInstance.collectionPoints);
             // 结束时回调
             onEnd(exposed);
+
+            if (draggable) {
+                handleMarkerEvent();
+            }
         }
         const cancelAllevent = () => {
             this.smap.off("click", handleClick);
@@ -390,6 +455,38 @@ export const interaction = (Smap) => {
             this.smap.off("contextmenu", handleRightClick);
         }
 
+        const markerTextUpdate = (index) => {
+            //更新文本标签
+            for (let j = 0; j < pointCollectInstance.collectionPoints.length; j += 1) {
+                const len = pointCollectInstance.computeLength({ lastIndex: j + 1 });
+                const txt = len ? `${Math.round(len * 100) / 100}km` : "起点";
+                if (index == j) {
+                    markerTextCollectInstance.collectUpdate({ index: j, txt, lnglat: pointCollectInstance.collectionPoints[i] });
+                } else {
+                    markerTextCollectInstance.collectUpdate({ index: j, txt });
+                }
+
+            }
+        }
+        //Marker 对象注册监听事件
+        const handleMarkerEvent = () => {
+            const markers = markerCollectInstance.collectionMarkers;
+            for (let i = 0; i < markers.length; i += 1) {
+                (function (i) {
+                    const marker = markers[i].setDraggable(true);
+                    marker.on("drag", (e) => {
+                        const { lng, lat } = e.target.getLngLat();
+                        pointCollectInstance.collectUpdate(i, [lng, lat]);
+                        renderLine(pointCollectInstance.collectionPoints);
+                        markerTextUpdate(i);
+                        onDrag(exposed);
+                    })
+                    marker.on("dragend", () => {
+                        onDragEnd(exposed);
+                    })
+                })(i)
+            }
+        }
 
         this.smap.on('click', handleClick);
         // 绘制开始回调
@@ -418,6 +515,11 @@ PointCollect.prototype.colllectPop = function () {
         this.length -= 1;
     }
 }
+
+PointCollect.prototype.collectUpdate = function (index, data) {
+    this.collectionPoints[index] = data;
+}
+
 PointCollect.prototype.pointsToLinefeature = function (data) {
     if (!Array.isArray(data)) return;
     let lineFeature = {
@@ -430,12 +532,12 @@ PointCollect.prototype.pointsToLinefeature = function (data) {
     return lineFeature;
 }
 // 计算长度
-PointCollect.prototype.computeLength = function ({ units = "kilometers" } = {}) {
-    if (this.length <= 1) {
+PointCollect.prototype.computeLength = function ({ lastIndex, units = "kilometers" } = {}) {
+    if (this.length <= 1 || (lastIndex && lastIndex <= 1)) {
         console.error("坐标数据...");
         return;
     }
-    const lineFeature = lineString(this.collectionPoints);
+    const lineFeature = lineString(lastIndex ? this.collectionPoints.slice(0, lastIndex) : this.collectionPoints);
     const len = length(lineFeature, { units });
     return len;
 
@@ -495,7 +597,10 @@ MarkerCollect.createMarkerElement = function ({ text = "起点", icon = null, ic
 
     const Element = document.createElement('div');
     Element.style = "display:inline-block; padding:4px 8px;white-space:nowrap;opacity:.8;background-color:#ffcc33; border-radius: 4px;color: #000;";
-    Element.textContent = text;
+    const TextElement = document.createElement("span");
+    TextElement.setAttribute("class", "markertext");
+    TextElement.textContent = text;
+    Element.appendChild(TextElement);
 
     console.log(icon, 444555);
     if (icon) {
@@ -525,6 +630,16 @@ MarkerCollect.prototype.colllectPop = function () {
     if (marker) {
         marker.remove();
         this.length -= 1;
+    }
+}
+
+MarkerCollect.prototype.collectUpdate = function ({ index, txt, lnglat } = {}) {
+    const marker = this.collectionMarkers[index];
+    if (lnglat) {
+        marker.setLngLat(lnglat);
+    }
+    if (txt) {
+        this.collectionMarkers[index]._element.childNodes[0].innerHTML = txt;
     }
 }
 
