@@ -3,17 +3,15 @@
  * 
  */
 import * as turf from '@turf/turf';
+import mapboxgl from 'mapbox-gl';
 
-
-export default function (Smap) {
-    Smap.prototype.Turf = (function () {
-        return {
-            turf: turf,
-            point,
-            featureCollection
-        }
-    })()
+export default function initGlobalApi(Smap) {
+    Smap.$turf = turf;
+    Smap.$mapbox = mapboxgl;
+    Smap.point = point;
+    Smap.featureCollection = featureCollection;
 }
+
 
 /**
  * 点坐标转化为 point feature 
