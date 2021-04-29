@@ -49,7 +49,7 @@ function addLayerToGroup(map, groupId, layer, beforeId) {
 function removeGroup(map, id) {
     var layers = map.getStyle().layers;
     for (var i = 0; i < layers.length; i++) {
-        if (layers[i].metadata.group === id) {
+        if (layers[i].metadata && layers[i].metadata.group === id) {
             map.removeLayer(layers[i].id);
         }
     }
@@ -97,7 +97,7 @@ function getGroupLastLayerId(map, id) {
 function getGroupFirstLayerIndex(map, id) {
     var layers = map.getStyle().layers;
     for (var i = 0; i < layers.length; i++) {
-        if (layers[i].metadata.group === id) return i;
+        if (layers[i].metadata && layers[i].metadata.group === id) return i;
     }
     return -1;
 }
