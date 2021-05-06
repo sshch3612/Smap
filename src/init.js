@@ -4,11 +4,11 @@ import { interaction } from './interaction';
 import iconsource from "./iconsource";
 import initEvent from "./event";
 
-mapboxgl.accessToken = 'pk.eyJ1Ijoic3NoY2giLCJhIjoiY2s4ZTQ1MmR3MGdjODNucDdxa3N5cTFsMSJ9.Nsv26T0aTiOeB-oMj0oPGA';
+// mapboxgl.accessToken = 'pk.eyJ1Ijoic3NoY2giLCJhIjoiY2s4ZTQ1MmR3MGdjODNucDdxa3N5cTFsMSJ9.Nsv26T0aTiOeB-oMj0oPGA';
 export const initMixin = (Smap) => {
     Smap.prototype._init = function (options = {
-        id, center, zoom, minZoom, maxZoom
-    }, mapType, mapSource) {
+        id, center, zoom, minZoom, maxZoom, sources, layers, style
+    }) {
         const vm = this;
 
         vm.initOptions = options;
@@ -19,59 +19,28 @@ export const initMixin = (Smap) => {
         /** 地图底图类型集锦*/
         vm.mapType = mapType;
         vm.sources = mapSource;
-        vm.smap = baiduMap(options);
+        vm.smap = initLoadMap(options);
     };
 
     interaction(Smap);
-    iconsource(Smap);  
+    iconsource(Smap);
     initEvent(Smap);
 }
 
 export function initLoadMap(options) {
-    const { id, layerNames, center, zoom, minZoom, maxZoom } = options;
-    // const layers = [];
-    // const sources = this.sources;
+    const { id, center, zoom, minZoom, maxZoom, sources, layers, style } = options;
 
-    // Object.keys(this.sources).forEach(key => {
-    //     const layer = {
-    //         id: key,
-    //         type: 'raster',
-    //         source: key,
-    //         layout: {
-    //             visibility: 'none',
-    //         },
-    //     };
-    //     if (layerNames.includes(key)) {
-    //         layer.layout.visibility = 'visible';
-    //     }
-    //     layers.push(layer);
-    // });
-    // const scene = new Scene({
-    //     id,
-    //     map: new Mapbox({
-    //         // style: "http://192.168.1.87:8082/map/deyang/dysl/tileSet/style.json",
-    //         style: {
-    //             version: 8,
-    //             sprite: "http://10.176.143.28:8082/msyx/picture/sprite@2x",
-    //             glyphs: "http://10.176.143.28:8082/msyx/font/{fontstack}/{range}.pbf",
-    //             sources: sources,
-    //             layers
-    //         },
-    //         minZoom: minZoom,
-    //         maxZoom: maxZoom,
-    //         center,
-    //         zoom,
-    //     })
-    // });
-    // vm.smap = scene.map;
+    const mapstyle = style || { version: 8, sources, layers }
     return new mapboxgl.Map({
         container: id || "map",
-        style: 'mapbox://styles/mapbox/streets-v9'
+        zoom: 9,
+        center: [103.64300272883702, 29.885843850603877],
+        style: mapstyle
     })
 }
 
 const baiduMap = (options) => {
-    const { id, layerNames, center, zoom, minZoom, maxZoom } = options;
+    const { id, center, zoom, minZoom, maxZoom, sources, layers, style } = options;
     return new mapboxgl.Map({
         container: id || "map",
         zoom: 9,
@@ -104,9 +73,12 @@ const gaodeMap = (options) => {
     return new mapboxgl.Map({
         container: id || "map",
         zoom: 9,
-        center: [103.64300272883702, 29.885843850603877],
+        center: [104.20474088683795,
+            30.702932860449977],
+        // style:require("./assets/style.json"),
         style: {
             version: 8,
+
             sources: {
                 "base": {
                     type: "raster",
@@ -118,16 +90,85 @@ const gaodeMap = (options) => {
                         // scl=2&style=6 为影像底图（不含路网、不含注记）
                         // scl=1&style=8 为影像路图（含路网，含注记）
                         // scl=2&style=8 为影像路网（含路网，不含注记）
-                        "http://wprd01.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8"],
+                        "http://wprd01.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7"],
                     tileSize: 256,
                 },
+                "dydw": {
+                    type: "vector",
+                    tiles: [
+                        "http://192.168.1.87:8082/map/deyang/dw/{z}/{x}/{y}.pbf"
+                    ],
+                    tileSize: 512
+                }
             },
+            sprite: "http://127.0.0.1:5501/src/assets/sprite",
             layers: [
                 {
                     id: "base",
                     type: 'raster',
                     source: "base",
+                },
+                {
+                    id: "testdw",
+                    type: "line",
+                    source: "dydw",
+                    "source-layer": "dydw",
+                    minzoom: 12,
+                    maxzoom: 22,
+                    filter: [
+                        "match",
+                        [
+                            "geometry-type"
+                        ],
+                        [
+                            "LineString"
+                        ],
+                        true,
+                        false
+                    ],
+                    paint: {
+                        "line-color": "red",
+                        "line-width": 5,
+                        "line-opacity": 0.5,
+                    },
+                    layout: {
+                        "line-cap": "butt",
+                        "line-join": "round",
+                    }
                 }
+                // {
+                //     id: "testdw",
+                //     type: "symbol",
+                //     source: "dydw",
+                //     "source-layer": "dydw",
+                //     minzoom: 0,
+                //     maxzoom: 22,
+                //     onAdd(a) {
+                //         console.log(a, "helloworld")
+                //     },
+                //     filter: [
+                //         "match",
+                //         [
+                //             "geometry-type"
+                //         ],
+                //         [
+                //             "Point"
+                //         ],
+                //         true,
+                //         false
+                //     ],
+
+                //     playout: {
+                //         "icon-allow-overlap": true,
+                //         "icon-image": "facebook",
+                //         "icon-size": [
+                //             "interpolate",
+                //             ["linear"], ["zoom"],
+                //             9, 1,
+                //             14, 1
+                //         ],
+                //     }
+                // }
             ]
         }
     })

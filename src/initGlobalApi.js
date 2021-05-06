@@ -4,12 +4,16 @@
  */
 import * as turf from '@turf/turf';
 import mapboxgl from 'mapbox-gl';
+import { proxyGetMousetip as mousetip } from "./util";
 
 export default function initGlobalApi(Smap) {
     Smap.$turf = turf;
     Smap.$mapbox = mapboxgl;
     Smap.point = point;
     Smap.featureCollection = featureCollection;
+    Smap.$util = {
+        mousetip
+    }
 }
 
 

@@ -5,7 +5,7 @@
 
 
 import { initMixin } from "./init";
-import  initTurf  from "./util";
+import initGlobalApi from "./initGlobalApi";
 
 function Smap(options) {
 
@@ -18,5 +18,7 @@ initMixin(Smap);
 //测绘
 
 //工具函数
-initTurf(Smap);
+initGlobalApi(Smap);
+
+//图层分组
 export default Smap;

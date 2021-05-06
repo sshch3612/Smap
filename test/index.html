@@ -4,13 +4,17 @@
 <head>
     <meta charset="utf-8" />
     <title>Add an animated icon to the map</title>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <script src="../lib/smap.umd.js"></script>
     <link href="../lib/smap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <style>
         body {
             margin: 0;
             padding: 0;
+
         }
 
         #map {
@@ -19,29 +23,125 @@
             bottom: 0;
             width: 100%;
         }
+
+        .tooltip1 {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 999;
+        }
     </style>
 </head>
 
 <body>
-    <div id="map"></div>
+    <div id="root">
+        <div id="map"></div>
+        <div class="tooltip1">
+            <button type="button" class="btn btn-primary" onclick="takeCoordinate()">取坐标</button>
+            <button type="button" class="btn btn-secondary" onclick="handleline()">测距</button>
+            <button type="button" class="btn btn-secondary" onclick="hanldeArea()">测多边形</button>
+            <button type="button" class="btn btn-secondary" onclick="handleCircle()">测范围</button>
+            <button type="button" class="btn btn-secondary" onclick="handleCallback()">事件回调</button>
+        </div>
+    </div>
+
 
     <script>
+
         var map = new Smap({
             id: "map"
         })
+        let Obj = null;
         console.log(map, 88777);
-        let dataPoint = [];
-        // map.on("load", function () {
-        //     map.loadDynamicPoint({ id: "point" });
-        //     const turf = map.Turf;
-        //     map.takeCoordinates((data) => {
-        //         console.log(data, 888888);
-        //         dataPoint = turf.point(data);
-        //         console.log(dataPoint, 6666);
-        //         map.addPointLayer({ id: 'test', image: 'point', data: dataPoint });
-        //     })
-        // })
 
+        let dataPoint = [];
+        map.on("load", function () {
+            // map.loadDynamicPoint({ id: "point" });
+            map.loadOneImage("point", "../src/assets/point.png")
+            const turf = Smap.Turf;
+            map.takeCoordinates((data) => {
+                console.log(data, 888888);
+                dataPoint = Smap.point(data);
+                console.log(dataPoint, 6666);
+                console.log(map.smap.getStyle(), 99);
+                map.addPointLayer({ id: 'test', image: 'point', data: dataPoint });
+            })
+            // map.on("click", "testdw", (e) => {
+            //     const feature = e.features[0];
+            //     console.log(e, feature, 55555);
+            // })
+            // map.on("click", (e) => {
+            //     console.log(e, e.target, 5555);
+
+            // })
+        })
+        // map.on('styledata', function () {
+        //     console.log('a styledata event occurred.');
+        //     map.on("click", "testdw", (e) => {
+        //         const feature = e.features[0];
+        //         console.log(e, feature, 55555);
+        //     })
+        // });
+        // 取坐标
+        function takeCoordinate() {
+            // map.takeCoordinates((data) => {
+            //     console.log(data, 888888);
+            //     alert(data);
+            // })
+            const style = map.smap.getStyle();
+            // console.log(style, "style");
+            // map.smap.removeSource("test");
+        }
+
+        // 画线
+        function handleline() {
+            // console.log(map.smap.getContainer(), 55555);
+            const Util = new Smap.$util.mousetip();
+            const _mousemove = (event) => {
+                // console.log(event, 2222);
+                const { x, y } = event.point;
+                Util.updatePosition(x + 10, y - 10);
+            }
+            const _click = (event) => {
+
+            }
+            map.ranging({
+                onStart: function () {
+                    map.setCanvasCursor("custom", "https://webmap0.bdimg.com/image/api/ruler.cur")
+                    Util.updateText("<h3>开始收集数据!</h3>");
+                    map.on("mousemove", _mousemove)
+                    map.once("click", () => {
+                        console.log("clickclick");
+                        // 更新数据
+                        Util.updateText("双击结束,右键撤回上一步");
+                    })
+                },
+                onEnd: function (e) {
+                    // console.log(e, "onend");
+                    Util.clearText()
+                    map.off("mousemove", _mousemove);
+                }
+            });
+        }
+
+        function hanldeArea() {
+            map.measureArea()
+        }
+        function handleCircle() {
+            map.drawCircle({
+                mode: 2, onEnd: function (e) {
+                    console.log(e, 6665555);
+                    Obj = e;
+                }
+            })
+        }
+
+        function handleCallback() {
+            if (Obj) {
+                console.log(Obj, 99888);
+                Obj.onCancel()
+            }
+        }
 
     </script>
 

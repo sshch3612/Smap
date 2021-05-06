@@ -3,6 +3,7 @@ import { addLayerToGroup } from "./layergroups";
 import { lineString } from "@turf/helpers";
 import * as turf from "@turf/turf";
 import length from "@turf/length";
+import * as rulerCur from "./assets/point.png";
 
 const Marker = mapboxgl.Marker;
 const Popup = mapboxgl.Popup;
@@ -14,10 +15,21 @@ export const interaction = (Smap) => {
     /**
      * 设置canvas 鼠标样式
      *
-     * @param {*} type
+     * @param {*} type ruler
+     * 鼠标样式  要使用绝对地址
+     * 支持 cur  ico格式图片
+     *  
      */
-    Smap.prototype.setCursor = function (type) {
+    Smap.prototype.setCanvasCursor = function (type, remoteUrl) {
         // TODO 增加鼠标样式集锦
+        const canvasStyle = this.smap.getCanvas().style;
+        if (type === "custom") {
+            canvasStyle.cursor = `url(${remoteUrl}) 12 12,pointer`;
+        } else {
+            canvasStyle.cursor = type;
+        }
+
+        return this;
     }
     /**
    *飞到指定位置

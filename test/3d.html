@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Add a 3D model</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic3NoY2giLCJhIjoiY2s4ZTQ1MmR3MGdjODNucDdxa3N5cTFsMSJ9.Nsv26T0aTiOeB-oMj0oPGA';
+        var map = (window.map = new mapboxgl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    "base": {
+                        type: "raster",
+                        tiles: [
+                            // wprd0{1-4} 
+                            // scl=1&style=7 为矢量图（含路网和注记）
+                            // scl=2&style=7 为矢量图（含路网但不含注记）
+                            // scl=1&style=6 为影像底图（不含路网，不含注记）
+                            // scl=2&style=6 为影像底图（不含路网、不含注记）
+                            // scl=1&style=8 为影像路图（含路网，含注记）
+                            // scl=2&style=8 为影像路网（含路网，不含注记）
+                            "http://wprd01.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8"],
+                        tileSize: 256,
+                    },
+                },
+                layers: [
+                    {
+                        id: "base",
+                        type: 'raster',
+                        source: "base",
+                    }
+                ]
+            },
+            zoom: 16,
+            center: [103.64300272883702, 29.885843850603877],
+            pitch: 60,
+            antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
+        }));
+
+        // parameters to ensure the model is georeferenced correctly on the map
+        var modelOrigin = [103.64300272883702, 29.885843850603877];
+        var modelAltitude = 0;
+        var modelRotate = [Math.PI / 2, 0, 0];
+
+        var modelAsMercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
+            modelOrigin,
+            modelAltitude
+        );
+
+        console.log(modelAsMercatorCoordinate, 44444);
+        // transformation parameters to position, rotate and scale the 3D model onto the map
+        var modelTransform = {
+            translateX: modelAsMercatorCoordinate.x,
+            translateY: modelAsMercatorCoordinate.y,
+            translateZ: modelAsMercatorCoordinate.z,
+            rotateX: modelRotate[0],
+            rotateY: modelRotate[1],
+            rotateZ: modelRotate[2],
+            /* Since our 3D model is in real world meters, a scale transform needs to be
+            * applied since the CustomLayerInterface expects units in MercatorCoordinates.
+            */
+            scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits()
+        };
+
+        var THREE = window.THREE;
+
+        // configuration of the custom layer for a 3D model per the CustomLayerInterface
+        var customLayer = {
+            id: '3d-model',
+            type: 'custom',
+            renderingMode: '3d',
+            onAdd: function (map, gl) {
+
+                this.scene = new THREE.Scene();
+
+                const color = new THREE.Color("#093A3C")
+
+                this.scene.background = color;
+                console.log(color, 4444);
+                this.camera = new THREE.PerspectiveCamera();
+
+                // create two three.js lights to illuminate the model
+                var directionalLight = new THREE.DirectionalLight(0xffffff);
+                directionalLight.position.set(0, -70, 100).normalize();
+                this.scene.add(directionalLight);
+
+                var directionalLight2 = new THREE.DirectionalLight(0xffffff);
+                directionalLight2.position.set(0, 70, 100).normalize();
+                this.scene.add(directionalLight2);
+
+
+                // use the three.js GLTF loader to add the 3D model to the three.js scene
+                var loader = new THREE.GLTFLoader();
+                loader.load(
+                    'https://docs.mapbox.com/mapbox-gl-js/assets/34M_17/34M_17.gltf',
+                    function (gltf) {
+                        this.scene.add(gltf.scene);
+                    }.bind(this)
+                );
+                this.map = map;
+
+                // use the Mapbox GL JS map canvas for three.js
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: map.getCanvas(),
+                    context: gl,
+                    antialias: true
+                });
+
+                this.renderer.autoClear = false;
+                //在渲染时添加click事件
+                this.renderer.domElement.addEventListener('click', (e) => {
+                    console.log(this, this.camera, 555555);
+                    e.preventDefault();
+                    const { clientX, clientY } = e
+                    const x = (clientX / window.innerWidth) * 2 - 1;
+                    const y = (clientY / window.innerHeight) * 2 + 1;
+                    const mousePoint = new THREE.Vector2(x, y)
+                    const raycaster = new THREE.Raycaster();
+                    // 通过摄像机和鼠标位置更新射线
+                    raycaster.setFromCamera(mousePoint, this.camera);
+
+                    // 计算物体和射线的焦点
+                    const intersects = raycaster.intersectObjects(this.scene.children, true);
+                    for (var i = 0; i < intersects.length; i++) {
+
+                        intersects[i].object.material.color.set(0xff0000);
+
+                    }
+                    console.log(intersects)
+                });
+            },
+            render: function (gl, matrix) {
+                var rotationX = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(1, 0, 0),
+                    modelTransform.rotateX
+                );
+                var rotationY = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(0, 1, 0),
+                    modelTransform.rotateY
+                );
+                var rotationZ = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(0, 0, 1),
+                    modelTransform.rotateZ
+                );
+                var m = new THREE.Matrix4().fromArray(matrix);
+                var l = new THREE.Matrix4()
+                    .makeTranslation(
+                        modelTransform.translateX,
+                        modelTransform.translateY,
+                        modelTransform.translateZ
+                    )
+                    .scale(
+                        new THREE.Vector3(
+                            modelTransform.scale,
+                            -modelTransform.scale,
+                            modelTransform.scale
+                        )
+                    )
+                    .multiply(rotationX)
+                    .multiply(rotationY)
+                    .multiply(rotationZ);
+
+                this.camera.projectionMatrix = m.multiply(l);
+                this.renderer.resetState();
+                this.renderer.render(this.scene, this.camera);
+                this.map.triggerRepaint();
+            }
+        };
+
+        map.on('style.load', function () {
+            map.addLayer(customLayer);
+        });
+    </script>
+
+</body>
+
+</html>
