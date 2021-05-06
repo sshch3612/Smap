@@ -1,5 +1,5 @@
 {
-  "name": "rollup-starter-lib",
+  "name": "smapbox",
   "version": "1.0.0",
   "main": "lib/smap.cjs.js",
   "module": "lib/smap.esm.js",
