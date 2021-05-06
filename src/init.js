@@ -17,8 +17,6 @@ export const initMixin = (Smap) => {
         // /** 文本是否标注*/
         // this.istextMark = false;
         /** 地图底图类型集锦*/
-        vm.mapType = mapType;
-        vm.sources = mapSource;
         vm.smap = initLoadMap(options);
     };
 
