@@ -77,7 +77,7 @@ export const exitScreen = () => {
 
 
 const util = {
-    proxyGetMousetip as mousetip,
+    mousetip: proxyGetMousetip,
     fullScreen,
     exitScreen,
     isDOM,
