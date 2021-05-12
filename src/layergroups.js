@@ -36,7 +36,7 @@ function addLayerToGroup(map, groupId, layer, beforeId) {
         beforeId = getLayerIdFromIndex(map, getGroupFirstLayerId(map, groupId) - 1);
     }
 
-    var groupedLayer = assign({}, layer, { metadata: assign({}, layer.metadata || {}, { group: groupId }) });
+    var groupedLayer = assign({}, layer, { metadata: assign({}, layer.metadata || {}, { 'mapbox:group': groupId }) });
     map.addLayer(groupedLayer, beforeId);
 }
 
@@ -49,7 +49,7 @@ function addLayerToGroup(map, groupId, layer, beforeId) {
 function removeGroup(map, id) {
     var layers = map.getStyle().layers;
     for (var i = 0; i < layers.length; i++) {
-        if (layers[i].metadata && layers[i].metadata.group === id) {
+        if (layers[i].metadata && layers[i].metadata['mapbox:group'] === id) {
             map.removeLayer(layers[i].id);
         }
     }
@@ -66,7 +66,7 @@ function moveGroup(map, id, beforeId) {
 
     var layers = map.getStyle().layers;
     for (var i = 0; i < layers.length; i++) {
-        if (layers[i].metadata.group === id) {
+        if (layers[i].metadata['mapbox:group'] === id) {
             map.moveLayer(layers[i].id, beforeLayerId);
         }
     }
@@ -97,7 +97,7 @@ function getGroupLastLayerId(map, id) {
 function getGroupFirstLayerIndex(map, id) {
     var layers = map.getStyle().layers;
     for (var i = 0; i < layers.length; i++) {
-        if (layers[i].metadata && layers[i].metadata.group === id) return i;
+        if (layers[i].metadata && layers[i].metadata['mapbox:group'] === id) return i;
     }
     return -1;
 }
@@ -106,7 +106,7 @@ function getGroupLastLayerIndex(map, id) {
     var layers = map.getStyle().layers;
     var i = getGroupFirstLayerIndex(map, id);
     if (i === -1) return -1;
-    while (i < layers.length && (layers[i].id === id || layers[i].metadata.group === id)) i++;
+    while (i < layers.length && (layers[i].id === id || layers[i].metadata['mapbox:group'] === id)) i++;
     return i - 1;
 }
 
@@ -117,7 +117,7 @@ function getLayerIdFromIndex(map, index) {
 }
 
 function getLayerGroup(map, id) {
-    return map.getLayer(id).metadata.group;
+    return map.getLayer(id).metadata['mapbox:group'];
 }
 
 function isLayer(map, id) {
