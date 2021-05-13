@@ -422,7 +422,7 @@ export const interaction = (Smap) => {
      * 3、事件处理
      * 4、增加周期事件 开始绘制、结束绘制、全部删除、
      */
-    Smap.prototype.ranging = function ({ draggable = false, onStart = function () { }, onDrag = function () { }, onDragEnd = function () { }, onDelete = function () { }, onRevoke = function () { }, onEnd = function () { } } = {}) {
+    Smap.prototype.ranging = function ({ draggable = false, onStart = function () { }, onDoing = function () { }, onDrag = function () { }, onDragEnd = function () { }, onDelete = function () { }, onRevoke = function () { }, onEnd = function () { } } = {}) {
 
 
 
@@ -483,6 +483,7 @@ export const interaction = (Smap) => {
                 renderLine(pointCollectInstance.collectionPoints);
                 if (isEventFirst) {
                     isEventFirst = false;
+                    onDoing(exposed);
                     this.smap.on("mousemove", handleMove);
                     this.smap.on("contextmenu", handleRightClick);
                 }
@@ -603,7 +604,7 @@ export const interaction = (Smap) => {
      * 3、事件处理
      * 4、增加周期事件 开始绘制、结束绘制、全部删除、
      */
-    Smap.prototype.measureArea = function ({ draggable = false, onStart = function () { }, onDelete = function () { }, onRevoke = function () { }, onDrag = function () { }, onDragEnd = function () { }, onEnd = function () { } } = {}) {
+    Smap.prototype.measureArea = function ({ draggable = false, onStart = function () { }, onDoing = function () { }, onDelete = function () { }, onRevoke = function () { }, onDrag = function () { }, onDragEnd = function () { }, onEnd = function () { } } = {}) {
 
 
 
@@ -715,6 +716,7 @@ export const interaction = (Smap) => {
                 updateCenter(pointCollectInstance.collectionPoints);
                 if (isEventFirst) {
                     isEventFirst = false;
+                    onDoing(exposed)
                     this.smap.on("mousemove", handleMove);
                     this.smap.on("contextmenu", handleRightClick);
                 }
@@ -828,7 +830,7 @@ export const interaction = (Smap) => {
      * 根据半径画圆
      * 
     */
-    Smap.prototype.drawCircle = function ({ mode = 1, onStart = function () { }, onDelete = function () { }, onRevoke = function () { }, onEnd = function () { } } = {}) {
+    Smap.prototype.drawCircle = function ({ mode = 1, onStart = function () { }, onDoing = function () { }, onDelete = function () { }, onRevoke = function () { }, onEnd = function () { } } = {}) {
 
 
 
@@ -962,12 +964,14 @@ export const interaction = (Smap) => {
 
             if (isEventFirst && mode === 1) {
                 isEventFirst = false;
+                onDoing(exposed);
                 this.smap.once("click", handlecomplete);
                 this.smap.on("mousemove", handleMove);
                 this.smap.on("contextmenu", handleRightClick);
 
             }
             if (mode === 2) {
+                onDoing(exposed);
                 exposed.onOk = handleDrawComplete;
                 exposed.onCancel = deleteAll;
                 onEnd(exposed);

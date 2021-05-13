@@ -31,8 +31,10 @@ export function initLoadMap(options) {
     const mapstyle = style || { version: 8, sources, layers }
     return new mapboxgl.Map({
         container: id || "map",
-        zoom: 9,
-        center: [103.64300272883702, 29.885843850603877],
+        zoom: zoom || 9,
+        center: center || [103.64300272883702, 29.885843850603877],
+        minZoom: minZoom || 0,
+        maxZoom: maxZoom || 22,
         style: mapstyle
     })
 }
@@ -111,7 +113,7 @@ const gaodeMap = (options) => {
                     type: "line",
                     source: "dydw",
                     "source-layer": "dydw",
-                    minzoom: 12,
+                    minzoom: 8,
                     maxzoom: 22,
                     filter: [
                         "match",
