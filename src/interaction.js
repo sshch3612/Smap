@@ -78,13 +78,44 @@ export const interaction = (Smap) => {
      * 选取坐标
      * 
     */
-    Smap.prototype.takeCoordinates = function (callback) {
+    Smap.prototype.takeCoordinates = function ({ image = "dynamic-point", onStart = function () { }, onDoing = function () { }, onDelete = function () { }, onEnd = function () { } } = {}) {
+
+        const exposed = {};
+
+        const uuid = String(Date.now());
+        const layerId = `${uuid}-point`;
+        const pointCollectInstance = new PointCollect();
+
+        const isFirst = true;
+
+        exposed.data = pointCollectInstance.collectionPoints;
         const makePoint = (e) => {
             const { lng, lat } = e.lngLat;
             const pointCoordinate = [lng, lat];
-            if (callback) callback(pointCoordinate)
+            const dataPoint = turf.point(pointCoordinate);
+            pointCollectInstance.collectionPoints = [pointCoordinate];
+            const sourceId = this.setGeojsonSource(layerId, dataPoint);
+
+            if (sourceId) {
+                const layerData = this.setPointLayer({ id: layerId, image, sourceid: sourceId });
+                this.addLayer("tool", layerData);
+            }
+            if (isFirst) {
+                isFirst = false;
+                onDoing(exposed);
+            }
+            onEnd(exposed)
         }
-        this.smap.once('click', makePoint);
+
+        const deleteAll = () => {
+            this.smap.removeLayer(layerId);
+            onDelete(exposed);
+        }
+
+        this.smap.on('click', makePoint);
+        exposed.event = { type: "click", fn: makePoint }
+        exposed.remove = deleteAll;
+        onStart(exposed)
     }
     /**
      * 单张图片加载
@@ -138,7 +169,7 @@ export const interaction = (Smap) => {
      * 
     */
     Smap.prototype.setPointLayer = function (option = { id, image, minZoom, maxZoom, sourceid }, callback) {
-        const { id, image, minZoom, maxZoom, data } = option;
+        const { id, image, minZoom, maxZoom, sourceid, data } = option;
         const layerData = {
             id: id,
             type: "symbol",
@@ -1059,7 +1090,6 @@ function PointCollect() {
 PointCollect.prototype.collectPush = function (data) {
     this.length += 1;
     this.collectionPoints.push(data);
-    console.log(this.collectionPoints, 98766234);
 };
 PointCollect.prototype.collectDeleteOne = function (index) {
     this.collectionPoints.splice(index, 1);
@@ -1201,7 +1231,7 @@ MarkerCollect.createPointElement = function ({ color = '#FFFFFF',
 MarkerCollect.createMarkerElement = function ({ text = "起点", icon = null, iconClick } = {}) {
 
     const Element = document.createElement('div');
-    Element.style = "display:inline-block; padding:4px 8px;white-space:nowrap;opacity:.8;background-color:#ffcc33; border-radius: 4px;color: #000;";
+    Element.style = "display:inline-block; padding:4px 8px;white-space:nowrap;opacity:.8;background-color:#ffcc33; border-radius: 4px;color: #000;margin-right:12px;";
     const TextElement = document.createElement("span");
     TextElement.className = "markertext";
     if (typeof text == "string") {
@@ -1215,6 +1245,7 @@ MarkerCollect.createMarkerElement = function ({ text = "起点", icon = null, ic
 
     if (icon) {
         const destroyImgElement = document.createElement('img');
+        destroyImgElement.style = "transform:translateY(3px)";
         destroyImgElement.src = icon;
         destroyImgElement.onclick = () => {
             iconClick && iconClick();
