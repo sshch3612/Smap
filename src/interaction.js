@@ -76,24 +76,26 @@ export const interaction = (Smap) => {
 
     /**
      * 选取坐标
-     * 
+     * exposed
     */
-    Smap.prototype.takeCoordinates = function ({ image = "dynamic-point", onStart = function () { }, onDoing = function () { }, onDelete = function () { }, onEnd = function () { } } = {}) {
+    Smap.prototype.takeCoordinates = function ({ id, image = "dynamic-point", onStart = function () { }, onDoing = function () { }, onDelete = function () { }, onEnd = function () { } } = {}) {
 
-        const exposed = {};
+        const _this = this;
+        const exposed = {
+            mapinstance: _this
+        };
 
         const uuid = String(Date.now());
-        const layerId = `${uuid}-point`;
-        const pointCollectInstance = new PointCollect();
+        const layerId = id || `${uuid}-point`;
 
         let isFirst = true;
 
-        exposed.data = pointCollectInstance.collectionPoints;
+        exposed.data = []
         const makePoint = (e) => {
             const { lng, lat } = e.lngLat;
             const pointCoordinate = [lng, lat];
             const dataPoint = turf.point(pointCoordinate);
-            pointCollectInstance.collectionPoints = [pointCoordinate];
+            exposed.data = pointCoordinate;
             const sourceId = this.setGeojsonSource(layerId, dataPoint);
 
             if (sourceId) {
@@ -107,8 +109,14 @@ export const interaction = (Smap) => {
             onEnd(exposed)
         }
 
+        const cancelAllevent = () => {
+            this.smap.off("click", makePoint);
+        }
+
         const deleteAll = () => {
+            cancelAllevent()
             this.smap.removeLayer(layerId);
+            delete exposed.event;
             onDelete(exposed);
         }
 
@@ -197,7 +205,7 @@ export const interaction = (Smap) => {
      * 设置线图层
      * 
     */
-    Smap.prototype.setLineLayer = function ({ sourceId, id, style = {}, animation = "none",
+    Smap.prototype.setLineLayer = function ({ sourceId, id, image, flash = false, style = {}, animation = "none",
         minZoom = 9, maxZoom = 22 } = {}) {
 
         const styleOption = Object.assign({}, style, {
@@ -223,6 +231,7 @@ export const interaction = (Smap) => {
                 "line-join": "round",
             }
         };
+        if (flash) layerData.paint['line-pattern'] = image
         return layerData
     }
 
@@ -456,9 +465,10 @@ export const interaction = (Smap) => {
     Smap.prototype.ranging = function ({ draggable = false, onStart = function () { }, onDoing = function () { }, onDrag = function () { }, onDragEnd = function () { }, onDelete = function () { }, onRevoke = function () { }, onEnd = function () { } } = {}) {
 
 
-
-        const exposed = {};
-
+        const _this = this;
+        const exposed = {
+            mapinstance: _this
+        };
         const pointCollectInstance = new PointCollect();
         const markerCollectInstance = new MarkerCollect();
         const markerTextCollectInstance = new MarkerCollect();
@@ -639,7 +649,10 @@ export const interaction = (Smap) => {
 
 
 
-        const exposed = {};
+        const _this = this;
+        const exposed = {
+            mapinstance: _this
+        };
 
         const pointCollectInstance = new PointCollect();
         const markerCollectInstance = new MarkerCollect();
@@ -865,7 +878,10 @@ export const interaction = (Smap) => {
 
 
 
-        const exposed = {};
+        const _this = this;
+        const exposed = {
+            mapinstance: _this
+        };
 
         const pointCollectInstance = new PointCollect();
         const markerCollectInstance = new MarkerCollect();
