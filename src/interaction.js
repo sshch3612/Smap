@@ -86,7 +86,7 @@ export const interaction = (Smap) => {
         const layerId = `${uuid}-point`;
         const pointCollectInstance = new PointCollect();
 
-        const isFirst = true;
+        let isFirst = true;
 
         exposed.data = pointCollectInstance.collectionPoints;
         const makePoint = (e) => {
