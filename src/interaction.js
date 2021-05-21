@@ -176,7 +176,7 @@ export const interaction = (Smap) => {
      * 设置点图层
      * 
     */
-    Smap.prototype.setPointLayer = function (option = { id, image, minZoom, maxZoom, sourceid }, callback) {
+    Smap.prototype.setPointLayer = function (option = { id, image, minZoom, maxZoom, sourceid }) {
         const { id, image, minZoom, maxZoom, sourceid, data } = option;
         const layerData = {
             id: id,
@@ -205,7 +205,7 @@ export const interaction = (Smap) => {
      * 设置线图层
      * 
     */
-    Smap.prototype.setLineLayer = function ({ sourceId, id, image, flash = false, style = {}, animation = "none",
+    Smap.prototype.setLineLayer = function ({ sourceid, id, image, flash = false, style = {}, animation = "none",
         minZoom = 9, maxZoom = 22 } = {}) {
 
         const styleOption = Object.assign({}, style, {
@@ -493,7 +493,7 @@ export const interaction = (Smap) => {
             const lineFeature = pointCollectInstance.pointsToLinefeature(data);
             const sourceId = this.setGeojsonSource(lineId, lineFeature);
             if (sourceId) {
-                const layerData = this.setLineLayer({ id: lineId, sourceId });
+                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId });
                 this.addLayer("tool", layerData);
             }
         };
@@ -724,7 +724,7 @@ export const interaction = (Smap) => {
             const fillSourceId = this.setGeojsonSource(polyonId, fillFeature);
 
             if (sourceId) {
-                const layerData = this.setLineLayer({ id: lineId, sourceId });
+                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId });
                 this.addLayer("tool", layerData);
             }
             if (fillSourceId) {
@@ -949,7 +949,7 @@ export const interaction = (Smap) => {
             const circleSourceId = this.setGeojsonSource(circleId, circleFeature);
             console.log(circleSourceId, 44444);
             if (sourceId) {
-                const layerData = this.setLineLayer({ id: lineId, sourceId });
+                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId });
                 this.addLayer("tool", layerData);
             }
             if (circleSourceId) {

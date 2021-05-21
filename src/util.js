@@ -5,7 +5,16 @@ function mousetip() {
 mousetip.prototype.init = function () {
     const Element = document.createElement("div");
     Element.className = "mousetip";
-    Element.style.position = "fixed";
+    Element.style = `position: fixed;
+                    cursor: inherit;
+                    background-color: rgb(255, 255, 255);
+                    border: 1px solid rgb(255, 1, 3);
+                    padding: 3px 5px;
+                    white-space: nowrap;
+                    font-size: 12px;
+                    z-index: 85;
+                    color: rgb(51, 51, 51);
+                    user-select: none;`
     this.tipElement = Element;
     document.body.appendChild(this.tipElement);
 }
@@ -22,6 +31,15 @@ mousetip.prototype.updateText = function (element) {
         this.tipElement.appendChild(element);
     }
 }
+
+mousetip.prototype.show = function () {
+    this.tipElement.style.display = "block";
+}
+
+mousetip.prototype.hide = function () {
+    this.tipElement.style.display = "none";
+}
+
 
 mousetip.prototype.clearText = function () {
     this.tipElement.innerHTML = "";
