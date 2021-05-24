@@ -2,23 +2,29 @@
 
 // import { Scene } from "@antv/l7";
 // import { Mapbox } from "@antv/l7-maps";
-
+import * as  layerGrounp from "./layergroups";
 
 import { initMixin } from "./init";
 import initGlobalApi from "./initGlobalApi";
 
-function Smap(options) {
+function Map(options) {
 
 	this._init(options)
 }
 
 //初始化加载
-initMixin(Smap);
+initMixin(Map);
 //地图交互
 //测绘
 
 //工具函数
-initGlobalApi(Smap);
+initGlobalApi(Map);
 
 //图层分组
-export default Smap;
+const exported = {
+	Map,
+	layerGrounp
+}
+
+export default exported;
+

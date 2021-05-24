@@ -208,17 +208,17 @@ export const interaction = (Smap) => {
     Smap.prototype.setLineLayer = function ({ sourceid, id, image, flash = false, style = {}, animation = "none",
         minZoom = 9, maxZoom = 22 } = {}) {
 
-        const styleOption = Object.assign({}, style, {
+        const styleOption = Object.assign({}, {
             color: "#ccc000",
             width: 3,
             dashed: false,
             dasharray: [2, 2]
-        });
+        }, style);
         const { color, width, dashed, dasharray } = styleOption;
         const layerData = {
             id: id,
             type: "line",
-            source: sourceId,
+            source: sourceid,
             minzoom: minZoom,
             maxZoom: maxZoom,
             paint: {
