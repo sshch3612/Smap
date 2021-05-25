@@ -6,6 +6,7 @@ import * as  layerGrounp from "./layergroups";
 
 import { initMixin } from "./init";
 import initGlobalApi from "./initGlobalApi";
+import * as mapUtil from "./util";
 
 function Map(options) {
 
@@ -23,7 +24,8 @@ initGlobalApi(Map);
 //图层分组
 const exported = {
 	Map,
-	layerGrounp
+	layerGrounp,
+	mapUtil
 }
 
 export default exported;
