@@ -81,7 +81,7 @@ export const interaction = (Smap) => {
     Smap.prototype.takeCoordinates = function ({ id, image = "dynamic-point", onStart = function () { }, onDoing = function () { }, onDelete = function () { }, onEnd = function () { } } = {}) {
 
         const _this = this;
-        const exposed = {
+        let exposed = {
             mapinstance: _this
         };
 
@@ -466,7 +466,7 @@ export const interaction = (Smap) => {
 
 
         const _this = this;
-        const exposed = {
+        let exposed = {
             mapinstance: _this
         };
         const pointCollectInstance = new PointCollect();
@@ -653,7 +653,7 @@ export const interaction = (Smap) => {
 
 
         const _this = this;
-        const exposed = {
+        let exposed = {
             mapinstance: _this
         };
 
@@ -884,7 +884,7 @@ export const interaction = (Smap) => {
 
 
         const _this = this;
-        const exposed = {
+        let exposed = {
             mapinstance: _this
         };
 
