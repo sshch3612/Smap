@@ -115,8 +115,8 @@ export const interaction = (Smap) => {
 
         const deleteAll = () => {
             cancelAllevent()
-            this.smap.removeLayer(layerId);
-            delete exposed.event;
+            this.removeLayer(layerId);
+            exposed = null;
             onDelete(exposed);
         }
 
@@ -570,6 +570,7 @@ export const interaction = (Smap) => {
             markerCollectInstance.Empty();
             markerTextCollectInstance.Empty();
             // 删除回调
+            exposed = null;
             onDelete(exposed);
         }
 
@@ -585,6 +586,7 @@ export const interaction = (Smap) => {
             markerTextCollectInstance.collectPush({ offset: [0, -24], lnglat: [lng, lat], element: MarkerCollect.createMarkerElement({ text: txt, icon: require('./assets/destroy.png'), iconClick: deleteAll }), target: this.smap });
             renderLine(pointCollectInstance.collectionPoints);
             // 结束时回调
+            exposed.remove = deleteAll;
             onEnd(exposed);
 
             if (draggable) {
@@ -592,6 +594,7 @@ export const interaction = (Smap) => {
             }
         }
         const cancelAllevent = () => {
+            exposed.event = null;
             this.smap.off("click", handleClick);
             this.smap.off("mousemove", handleMove);
             this.smap.off("contextmenu", handleRightClick);
@@ -808,6 +811,7 @@ export const interaction = (Smap) => {
             markerCollectInstance.Empty();
             markerTextCollectInstance.Empty();
             // 删除回调
+            exposed = null;
             onDelete(exposed);
         }
 
@@ -820,6 +824,7 @@ export const interaction = (Smap) => {
             updateCenter(pointCollectInstance.collectionPoints, require("./assets/destroy.png"), deleteAll);
             renderLine(pointCollectInstance.collectionPoints);
             // 结束时回调
+            exposed.remove = deleteAll;
             onEnd(exposed);
 
             if (draggable) {
@@ -1059,6 +1064,7 @@ export const interaction = (Smap) => {
             markerCollectInstance.Empty();
             markerTextCollectInstance.Empty();
             // 删除回调
+            exposed = null;
             onDelete(exposed);
         }
 
@@ -1073,6 +1079,7 @@ export const interaction = (Smap) => {
             updateCenter(pointCollectInstance.collectionPoints, require("./assets/destroy.png"), deleteAll);
             renderLine(pointCollectInstance.collectionPoints);
             // 结束时回调
+            exposed.remove = deleteAll;
             onEnd(exposed);
         }
 
@@ -1247,9 +1254,10 @@ MarkerCollect.createPointElement = function ({ color = '#FFFFFF',
 MarkerCollect.createMarkerElement = function ({ text = "起点", icon = null, iconClick } = {}) {
 
     const Element = document.createElement('div');
-    Element.style = "display:inline-block; padding:4px 8px;white-space:nowrap;opacity:.8;background-color:#ffcc33; border-radius: 4px;color: #000;margin-right:12px;";
+    Element.style = "display:inline-block; padding:4px 8px;white-space:nowrap;opacity:.8;background-color:#ffcc33; border-radius: 4px;color: #000;";
     const TextElement = document.createElement("span");
     TextElement.className = "markertext";
+    TextElement.style = "margin-right:8px;"
     if (typeof text == "string") {
         TextElement.textContent = text;
     }
