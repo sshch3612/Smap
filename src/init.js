@@ -12,6 +12,8 @@ export const initMixin = (Smap) => {
         const vm = this;
 
         vm.initOptions = options;
+        vm.planColor = "#ccc000";
+        vm.planLinewidth = 2
         /** 缓存地图注册的事件，避免注册多个事件 */
         // this.storageEvent = [];
         // /** 文本是否标注*/

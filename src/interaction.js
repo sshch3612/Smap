@@ -210,7 +210,7 @@ export const interaction = (Smap) => {
 
         const styleOption = Object.assign({}, {
             color: "#ccc000",
-            width: 3,
+            width: 2,
             dashed: false,
             dasharray: [2, 2]
         }, style);
@@ -455,6 +455,14 @@ export const interaction = (Smap) => {
         Element.style.height = `${width * 3}px`;
         return Element;
     }
+
+
+    Smap.prototype.setPlanColor = function (color) {
+        this.planColor = color;
+    }
+    Smap.prototype.setPlanLinewidth = function (line) {
+        this.planLinewidth = line
+    }
     /**
      * 测距
      * 1、收集点数据
@@ -493,7 +501,11 @@ export const interaction = (Smap) => {
             const lineFeature = pointCollectInstance.pointsToLinefeature(data);
             const sourceId = this.setGeojsonSource(lineId, lineFeature);
             if (sourceId) {
-                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId });
+                const style = {
+                    color: this.planColor,
+                    width: this.planLinewidth
+                }
+                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId, style });
                 this.addLayer("tool", layerData);
             }
         };
@@ -536,8 +548,8 @@ export const interaction = (Smap) => {
 
             if (pointCollectInstance.collectionPoints.length <= 1) {
                 // 撤销到第一步，就是删除
-                deleteAll();
                 cancelAllevent();
+                deleteAll();
                 onEnd(exposed);
                 return;
             }
@@ -727,11 +739,18 @@ export const interaction = (Smap) => {
             const fillSourceId = this.setGeojsonSource(polyonId, fillFeature);
 
             if (sourceId) {
-                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId });
+                const style = {
+                    color: this.planColor,
+                    width: this.planLinewidth
+                }
+                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId, style });
                 this.addLayer("tool", layerData);
             }
             if (fillSourceId) {
-                const layerData = this.setFillLayer({ id: polyonId, sourceId: fillSourceId });
+                const style = {
+                    backgroundcolor: this.planColor,
+                }
+                const layerData = this.setFillLayer({ id: polyonId, sourceId: fillSourceId, style });
                 this.addLayer("tool", layerData);
             }
         };
@@ -954,11 +973,18 @@ export const interaction = (Smap) => {
             const circleSourceId = this.setGeojsonSource(circleId, circleFeature);
             console.log(circleSourceId, 44444);
             if (sourceId) {
-                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId });
+                const style = {
+                    color: this.planColor,
+                    width: this.planLinewidth
+                }
+                const layerData = this.setLineLayer({ id: lineId, sourceid: sourceId, style });
                 this.addLayer("tool", layerData);
             }
             if (circleSourceId) {
-                const layerData = this.setFillLayer({ id: circleId, sourceId: circleSourceId });
+                const style = {
+                    backgroundcolor: this.planColor,
+                }
+                const layerData = this.setFillLayer({ id: circleId, sourceId: circleSourceId, style });
                 this.addLayer("tool", layerData)
             }
         };
@@ -969,7 +995,10 @@ export const interaction = (Smap) => {
             const circleSourceId = this.setGeojsonSource(circleId, circleFeature);
             console.log(this, circleSourceId, circleFeature, 5555);
             if (circleSourceId) {
-                const layerData = this.setFillLayer({ id: circleId, sourceId: circleSourceId });
+                const style = {
+                    backgroundcolor: this.planColor,
+                }
+                const layerData = this.setFillLayer({ id: circleId, sourceId: circleSourceId, style });
                 this.addLayer("tool", layerData)
             }
             const lnglat = data[0];
@@ -1023,10 +1052,9 @@ export const interaction = (Smap) => {
 
             }
             if (mode === 2) {
-                onDoing(exposed);
                 exposed.onOk = handleDrawComplete;
                 exposed.onCancel = deleteAll;
-                onEnd(exposed);
+                onDoing(exposed);
             }
         }
 
