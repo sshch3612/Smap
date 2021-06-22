@@ -28,7 +28,7 @@ export const initMixin = (Smap) => {
 }
 
 export function initLoadMap(options) {
-    const { id, center, zoom, minZoom, maxZoom, sources, layers, style } = options;
+    const { id, center, zoom, minZoom, maxZoom, sources, layers, style, ...restOptions } = options;
 
     const mapstyle = style || { version: 8, sources, layers }
     return new mapboxgl.Map({
@@ -37,7 +37,8 @@ export function initLoadMap(options) {
         center: center || [103.64300272883702, 29.885843850603877],
         minZoom: minZoom || 0,
         maxZoom: maxZoom || 22,
-        style: mapstyle
+        style: mapstyle,
+        ...restOptions
     })
 }
 

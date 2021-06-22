@@ -242,9 +242,9 @@ export const interaction = (Smap) => {
     Smap.prototype.setFillLayer = function ({ sourceId, id, style = {},
         minZoom = 9, maxZoom = 22 } = {}) {
 
-        const styleOption = Object.assign({}, style, {
+        const styleOption = Object.assign({}, {
             backgroundcolor: "#ccc000",
-        });
+        }, style);
         const { backgroundcolor } = styleOption;
         const layerData = {
             id: id,
@@ -550,7 +550,6 @@ export const interaction = (Smap) => {
                 // 撤销到第一步，就是删除
                 cancelAllevent();
                 deleteAll();
-                onEnd(exposed);
                 return;
             }
             pointCollectInstance.colllectPop();
@@ -795,7 +794,6 @@ export const interaction = (Smap) => {
                 // 撤销到第一步，就是删除
                 deleteAll();
                 cancelAllevent();
-                onEnd(exposed);
                 return;
             }
             pointCollectInstance.colllectPop();
@@ -907,6 +905,7 @@ export const interaction = (Smap) => {
             mapinstance: _this
         };
 
+        
         const pointCollectInstance = new PointCollect();
         const markerCollectInstance = new MarkerCollect();
         const markerTextCollectInstance = new MarkerCollect();
@@ -1065,7 +1064,6 @@ export const interaction = (Smap) => {
                 // 撤销到第一步，就是删除
                 deleteAll();
                 cancelAllevent();
-                onEnd(exposed);
                 return;
             }
             // 撤销上一步
@@ -1117,6 +1115,9 @@ export const interaction = (Smap) => {
             _id += 1;
             radiusToCircle({ data: pointCollectInstance.collectionPoints, radius, options });
             markerCollectInstance.Empty();
+            // 结束时回调
+            exposed.remove = deleteAll;
+            onEnd(exposed);
         }
         const cancelAllevent = () => {
             this.smap.off("click", handlecomplete);
