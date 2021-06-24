@@ -1219,7 +1219,7 @@ PointCollect.prototype.pointsToFillfeature = function (data) {
     return fillFeature;
 }
 // 计算长度
-PointCollect.prototype.computeLength = function ({ lastIndex, units = "meters" } = {}) {
+PointCollect.prototype.computeLength = function ({ lastIndex, units = "kilometers" } = {}) {
     if (this.length <= 1 || (lastIndex && lastIndex <= 1)) {
         console.error("坐标数据...");
         return;
