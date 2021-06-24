@@ -988,7 +988,7 @@ export const interaction = (Smap) => {
             }
         };
 
-        const radiusToCircle = ({ data, radius, options = { steps: 200, units: 'kilometers' } } = {}) => {
+        const radiusToCircle = ({ data, radius, options = { steps: 200, units: 'meters' } } = {}) => {
             if (data.length < 1) return;
             const circleFeature = pointCollectInstance.pointsToCirclefeature(data[0], radius, options)
             const circleSourceId = this.setGeojsonSource(circleId, circleFeature);
@@ -1110,7 +1110,7 @@ export const interaction = (Smap) => {
         }
 
         // 根据半径回调画圆
-        const handleDrawComplete = (radius, options = { steps: 200, units: 'kilometers' }) => {
+        const handleDrawComplete = (radius, options = { steps: 200, units: 'meters' }) => {
             if (_id > 0) return; // 防止重复调用
             _id += 1;
             radiusToCircle({ data: pointCollectInstance.collectionPoints, radius, options });
@@ -1176,7 +1176,7 @@ PointCollect.prototype.pointsToLinefeature = function (data) {
 }
 
 PointCollect.prototype.twopointsToCirclefeature = function (data, options = {
-    steps: 200, units: 'kilometers'
+    steps: 200, units: 'meters'
 }) {
     let circleFeature = {
         "type": "FeatureCollection",
@@ -1197,7 +1197,7 @@ PointCollect.prototype.twopointsToCirclefeature = function (data, options = {
 }
 
 PointCollect.prototype.pointsToCirclefeature = function (center, radius, options = {
-    steps: 200, units: 'kilometers'
+    steps: 200, units: 'meters'
 }) {
     if (!radius) {
         console.warn("请输入正确的半径")
@@ -1219,7 +1219,7 @@ PointCollect.prototype.pointsToFillfeature = function (data) {
     return fillFeature;
 }
 // 计算长度
-PointCollect.prototype.computeLength = function ({ lastIndex, units = "kilometers" } = {}) {
+PointCollect.prototype.computeLength = function ({ lastIndex, units = "meters" } = {}) {
     if (this.length <= 1 || (lastIndex && lastIndex <= 1)) {
         console.error("坐标数据...");
         return;
