@@ -512,35 +512,36 @@ export const interaction = (Smap) => {
 
         // 1.先注册点击事件
         const handleClick = (e) => {
-            if (currentTime) {
-                const current = Date.now();
-                console.log(current - currentTime, 45555666);
-                if (Number(current - currentTime) < delaytime) {
-                    currentTime = Date.now();
-                    clearTimeout(clickTimeouter);
-                    // 执行双击事件
-                    handlecomplete(e);
-                    return;
-                }
+            // if (currentTime) {
+            //     const current = Date.now();
+            //     if (Number(current - currentTime) < delaytime) {
+            //         currentTime = Date.now();
+            //         clearTimeout(clickTimeouter);
+            //         // 执行双击事件
+            //         handlecomplete(e);
+            //         return;
+            //     }
+            // }
+            // currentTime = Date.now();
+
+            // clickTimeouter = setTimeout(() => {
+            console.log("111111111111")
+            const { lng, lat } = e.lngLat;
+            pointCollectInstance.collectPush([lng, lat]);
+            markerCollectInstance.collectPush({ lnglat: [lng, lat], element: MarkerCollect.createPointElement(), target: this.smap });
+
+            const len = pointCollectInstance.computeLength();
+            const txt = len ? `${Math.round(len * 100) / 100}km` : "起点";
+            markerTextCollectInstance.collectPush({ offset: [0, -24], lnglat: [lng, lat], element: MarkerCollect.createMarkerElement({ text: txt }), target: this.smap });
+            renderLine(pointCollectInstance.collectionPoints);
+            if (isEventFirst) {
+                isEventFirst = false;
+                onDoing(exposed);
+                this.smap.on("mousemove", handleMove);
+                this.smap.on("contextmenu", handleRightClick);
+                this.smap.on("dblclick", handlecomplete)
             }
-            currentTime = Date.now();
-
-            clickTimeouter = setTimeout(() => {
-                const { lng, lat } = e.lngLat;
-                pointCollectInstance.collectPush([lng, lat]);
-                markerCollectInstance.collectPush({ lnglat: [lng, lat], element: MarkerCollect.createPointElement(), target: this.smap });
-
-                const len = pointCollectInstance.computeLength();
-                const txt = len ? `${Math.round(len * 100) / 100}km` : "起点";
-                markerTextCollectInstance.collectPush({ offset: [0, -24], lnglat: [lng, lat], element: MarkerCollect.createMarkerElement({ text: txt }), target: this.smap });
-                renderLine(pointCollectInstance.collectionPoints);
-                if (isEventFirst) {
-                    isEventFirst = false;
-                    onDoing(exposed);
-                    this.smap.on("mousemove", handleMove);
-                    this.smap.on("contextmenu", handleRightClick);
-                }
-            }, delaytime);
+            // }, delaytime);
         }
 
 
@@ -587,6 +588,11 @@ export const interaction = (Smap) => {
 
         const handlecomplete = (e) => {
             cancelAllevent();
+            for (let i = 0; i < 2; i += 1) {
+                pointCollectInstance.colllectPop();
+                markerCollectInstance.colllectPop();
+                markerTextCollectInstance.colllectPop()
+            }
             const { lng, lat } = e.lngLat;
             const movepoint = [lng, lat];
             pointCollectInstance.collectPush([lng, lat]);
@@ -609,6 +615,7 @@ export const interaction = (Smap) => {
             this.smap.off("click", handleClick);
             this.smap.off("mousemove", handleMove);
             this.smap.off("contextmenu", handleRightClick);
+            this.smap.off("dblclick", handlecomplete)
         }
 
         const markerTextUpdate = (index) => {
@@ -756,36 +763,37 @@ export const interaction = (Smap) => {
 
         // 1.先注册点击事件
         const handleClick = (e) => {
-            if (currentTime) {
-                const current = Date.now();
-                if (Number(current - currentTime) < delaytime) {
-                    currentTime = Date.now();
-                    clearTimeout(clickTimeouter);
+            // if (currentTime) {
+            //     const current = Date.now();
+            //     if (Number(current - currentTime) < delaytime) {
+            //         currentTime = Date.now();
+            //         clearTimeout(clickTimeouter);
 
-                    if (pointCollectInstance.collectionPoints.length <= 1) {
-                        return;
-                    }
-                    // 执行双击事件
-                    handlecomplete(e);
-                    return;
-                }
+            //         if (pointCollectInstance.collectionPoints.length <= 1) {
+            //             return;
+            //         }
+            //         // 执行双击事件
+            //         handlecomplete(e);
+            //         return;
+            //     }
+            // }
+            // currentTime = Date.now();
+
+            // clickTimeouter = setTimeout(() => {
+            const { lng, lat } = e.lngLat;
+            pointCollectInstance.collectPush([lng, lat]);
+            markerCollectInstance.collectPush({ lnglat: [lng, lat], element: MarkerCollect.createPointElement(), target: this.smap });
+
+            renderLine(pointCollectInstance.collectionPoints);
+            updateCenter(pointCollectInstance.collectionPoints);
+            if (isEventFirst) {
+                isEventFirst = false;
+                onDoing(exposed)
+                this.smap.on("mousemove", handleMove);
+                this.smap.on("contextmenu", handleRightClick);
+                this.smap.on("dblclick", handlecomplete)
             }
-            currentTime = Date.now();
-
-            clickTimeouter = setTimeout(() => {
-                const { lng, lat } = e.lngLat;
-                pointCollectInstance.collectPush([lng, lat]);
-                markerCollectInstance.collectPush({ lnglat: [lng, lat], element: MarkerCollect.createPointElement(), target: this.smap });
-
-                renderLine(pointCollectInstance.collectionPoints);
-                updateCenter(pointCollectInstance.collectionPoints);
-                if (isEventFirst) {
-                    isEventFirst = false;
-                    onDoing(exposed)
-                    this.smap.on("mousemove", handleMove);
-                    this.smap.on("contextmenu", handleRightClick);
-                }
-            }, delaytime);
+            // }, delaytime);
         }
 
 
@@ -833,6 +841,17 @@ export const interaction = (Smap) => {
         }
 
         const handlecomplete = (e) => {
+
+            if (pointCollectInstance.collectionPoints.length === 3){
+
+            }else{
+                
+            } 
+            for (let i = 0; i < 2; i += 1) {
+                pointCollectInstance.colllectPop();
+                markerCollectInstance.colllectPop();
+            }
+           
             cancelAllevent();
             const { lng, lat } = e.lngLat;
             const movepoint = [lng, lat];
@@ -850,6 +869,7 @@ export const interaction = (Smap) => {
         }
         const cancelAllevent = () => {
             this.smap.off("click", handleClick);
+            this.smap.off('dblclick', handlecomplete)
             this.smap.off("mousemove", handleMove);
             this.smap.off("contextmenu", handleRightClick);
         }
@@ -905,7 +925,7 @@ export const interaction = (Smap) => {
             mapinstance: _this
         };
 
-        
+
         const pointCollectInstance = new PointCollect();
         const markerCollectInstance = new MarkerCollect();
         const markerTextCollectInstance = new MarkerCollect();
@@ -1096,6 +1116,8 @@ export const interaction = (Smap) => {
 
         const handlecomplete = (e) => {
             cancelAllevent();
+
+
             const { lng, lat } = e.lngLat;
             const movepoint = [lng, lat];
             pointCollectInstance.collectPush([lng, lat]);
