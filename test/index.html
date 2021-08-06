@@ -48,28 +48,37 @@
 
     <script>
 
-        var map = new Smap({
+        var map = new Smap.Map({
             id: "map"
         })
         let Obj = null;
         console.log(map, 88777);
 
         let dataPoint = [];
+        map.on('styleimagemissing', function (e) {
+            console.log('A styleimagemissing event occurred.', e)
+            if (e.id === 'dynamic-point') {
+                map.loadDynamicPoint({ id: 'dynamic-point' })
+            }
+        })
         map.on("load", function () {
-            // map.loadDynamicPoint({ id: "point" });
-            map.loadOneImage("point", "../src/assets/point.png")
+            // map.loadDynamicGradient({ id: "dynamic-point" })
+            map.loadDynamicDashed({ id: "test" });
+            // map.loadOneImage("point", "../src/assets/point.png")
             const turf = Smap.Turf;
-            map.takeCoordinates((data) => {
-                console.log(data, 888888);
-                dataPoint = Smap.point(data);
-                console.log(dataPoint, 6666);
-                console.log(map.smap.getStyle(), 99);
-                map.addPointLayer({ id: 'test', image: 'point', data: dataPoint });
-            })
-            // map.on("click", "testdw", (e) => {
-            //     const feature = e.features[0];
-            //     console.log(e, feature, 55555);
+            // map.takeCoordinates({
+            //     onEnd: function (e) {
+            //         console.log(122222223, e);
+            //     }
             // })
+            map.on("click", "testdw", (e) => {
+                const feature = e.features[0];
+                console.log(e, feature, 55555);
+            })
+
+            map.on("resize", () => {
+                console.log("resize", map)
+            })
             // map.on("click", (e) => {
             //     console.log(e, e.target, 5555);
 
@@ -89,37 +98,39 @@
             //     alert(data);
             // })
             const style = map.smap.getStyle();
-            // console.log(style, "style");
+            console.log(style, "style");
             // map.smap.removeSource("test");
         }
 
         // 画线
         function handleline() {
             // console.log(map.smap.getContainer(), 55555);
-            const Util = new Smap.$util.mousetip();
-            const _mousemove = (event) => {
-                // console.log(event, 2222);
-                const { x, y } = event.point;
-                Util.updatePosition(x + 10, y - 10);
-            }
-            const _click = (event) => {
+            // const Util = Smap.$util.mousetip();
+            // console.log(Util, 666666);
+            // const _mousemove = (event) => {
+            //     // console.log(event, 2222);
+            //     Util.show();
+            //     const { x, y } = event.point;
+            //     Util.updatePosition(x + 10, y - 10);
+            // }
+            // const _click = (event) => {
 
-            }
+            // }
             map.ranging({
                 onStart: function () {
-                    map.setCanvasCursor("custom", "https://webmap0.bdimg.com/image/api/ruler.cur")
-                    Util.updateText("<h3>开始收集数据!</h3>");
-                    map.on("mousemove", _mousemove)
-                    map.once("click", () => {
-                        console.log("clickclick");
-                        // 更新数据
-                        Util.updateText("双击结束,右键撤回上一步");
-                    })
+                    // map.setCanvasCursor("custom", "http://127.0.0.1:5502/dist/punctuation.cur")
+                    // Util.updateText("<h3>开始收集数据!</h3>");
+                    // map.on("mousemove", _mousemove)
+                    // map.once("click", () => {
+                    //     console.log("clickclick");
+                    //     // 更新数据
+                    //     Util.updateText("双击结束,右键撤回上一步");
+                    // })
                 },
                 onEnd: function (e) {
                     // console.log(e, "onend");
-                    Util.clearText()
-                    map.off("mousemove", _mousemove);
+                    // Util.hide();
+                    // map.off("mousemove", _mousemove);
                 }
             });
         }
@@ -129,7 +140,7 @@
         }
         function handleCircle() {
             map.drawCircle({
-                mode: 2, onEnd: function (e) {
+                mode: 1, onEnd: function (e) {
                     console.log(e, 6665555);
                     Obj = e;
                 }
