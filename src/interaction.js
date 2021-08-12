@@ -842,16 +842,16 @@ export const interaction = (Smap) => {
 
         const handlecomplete = (e) => {
 
-            if (pointCollectInstance.collectionPoints.length === 3){
+            if (pointCollectInstance.collectionPoints.length === 3) {
 
-            }else{
-                
-            } 
+            } else {
+
+            }
             for (let i = 0; i < 2; i += 1) {
                 pointCollectInstance.colllectPop();
                 markerCollectInstance.colllectPop();
             }
-           
+
             cancelAllevent();
             const { lng, lat } = e.lngLat;
             const movepoint = [lng, lat];
@@ -1154,6 +1154,103 @@ export const interaction = (Smap) => {
         onStart(exposed);
     }
 
+    /**
+     * 画矩形
+     * 
+    */
+    Smap.prototype.drawBox = function ({ onStart = function () { }, onDoing = function () { }, onDelete = function () { }, onEnd = function () { }
+    } = {}) {
+        const _this = this;
+        let exposed = {
+            mapinstance: _this
+        };
+        const pointCollectInstance = new PointCollect();
+
+        exposed.data = pointCollectInstance.collectionPoints;
+
+        let isEventFirst = true;
+        const uuid = String(Date.now());
+        const lineId = `${uuid}-line`;
+        const boxId = `${uuid}-box`;
+        let ismouseMove = true;
+
+        // 渲染线条、圆形bing
+        const renderLine = (data) => {
+            const boxFeature = pointCollectInstance.twopointsToBoxfeature(data)
+            const boxSourceId = this.setGeojsonSource(boxId, boxFeature);
+            if (boxSourceId) {
+                const style = {
+                    color: this.planColor,
+                    width: this.planLinewidth
+                }
+                const layerData = this.setLineLayer({ id: lineId, sourceid: boxSourceId, style });
+                this.addLayer("tool", layerData);
+            }
+            if (boxSourceId) {
+                const style = {
+                    backgroundcolor: this.planColor,
+                }
+                const layerData = this.setFillLayer({ id: boxId, sourceId: boxSourceId, style });
+                this.addLayer("tool", layerData)
+            }
+        };
+
+        //1.先注册点击事件
+        const handleClick = (e) => {
+
+            const { lng, lat } = e.lngLat;
+            pointCollectInstance.collectPush([lng, lat]);
+
+            renderLine(pointCollectInstance.collectionPoints);
+
+            if (isEventFirst) {
+                isEventFirst = false;
+                onDoing(exposed)
+                this.smap.on("mousemove", handleMove)
+                this.smap.once("click", handlecomplete)
+                this.smap.once("contextmenu", handleRightClick);
+            }
+        }
+
+        const handleRightClick = () => {
+            deleteAll()
+            cancelAllevent()
+        }
+        const handleMove = (e) => {
+            if (ismouseMove) {
+                ismouseMove = false;
+                setTimeout(() => {
+                    const { lng, lat } = e.lngLat;
+                    const movepoint = [lng, lat];
+                    renderLine([...pointCollectInstance.collectionPoints, movepoint]);
+                    ismouseMove = true;
+                }, 50);
+            }
+        }
+
+        const deleteAll = () => {
+            this.smap.removeLayer(lineId);
+            this.smap.removeLayer(boxId);
+            // 删除回调
+            exposed = null;
+            onDelete(exposed);
+        }
+        const cancelAllevent = () => {
+            this.smap.off("mousemove", handleMove)
+            this.smap.off("click", handlecomplete)
+        }
+        const handlecomplete = () => {
+            this.smap.off("mousemove", handleMove)
+            this.smap.off("contextmenu", handleRightClick);
+            exposed.remove = deleteAll;
+            onEnd(exposed);
+        }
+
+        this.smap.once("click", handleClick);
+        //绘制开始回调
+        exposed.event = { type: "click", fn: handleClick };
+        onStart(exposed);
+    }
 }
 
 function PointCollect() {
@@ -1218,6 +1315,8 @@ PointCollect.prototype.twopointsToCirclefeature = function (data, options = {
     return circleFeature;
 }
 
+
+
 PointCollect.prototype.pointsToCirclefeature = function (center, radius, options = {
     steps: 200, units: 'meters'
 }) {
@@ -1227,6 +1326,21 @@ PointCollect.prototype.pointsToCirclefeature = function (center, radius, options
     }
     return turf.circle(center, radius, options);
 }
+
+PointCollect.prototype.twopointsToBoxfeature = function (data) {
+    const d = Array.prototype.slice.call(data);
+    if (!Array.isArray(d)) return;
+    let fillFeature = {
+        "type": "FeatureCollection",
+        "features": []
+    };
+    if (d.length > 1) {
+        let s = [d[0], [d[1][0], d[0][1]], d[1], [d[0][0], d[1][1]], d[0]]
+        fillFeature = turf.polygon([s]);
+    }
+    return fillFeature;
+}
+
 
 PointCollect.prototype.pointsToFillfeature = function (data) {
     data = Array.prototype.slice.call(data);
