@@ -25,11 +25,14 @@
 <body>
     <script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- <link href="http://127.0.0.1:5501/dist/threebox.css" rel="stylesheet">
+    <script src="http://127.0.0.1:5501/dist/threebox.min.js"></script> -->
     <div id="map"></div>
     <script>
         mapboxgl.accessToken = 'pk.eyJ1Ijoic3NoY2giLCJhIjoiY2s4ZTQ1MmR3MGdjODNucDdxa3N5cTFsMSJ9.Nsv26T0aTiOeB-oMj0oPGA';
         var map = (window.map = new mapboxgl.Map({
             container: 'map',
+            // style: 'mapbox://styles/mapbox/light-v10',
             style: {
                 version: 8,
                 sources: {
@@ -56,22 +59,42 @@
                 ]
             },
             zoom: 16,
-            center: [103.64300272883702, 29.885843850603877],
+            center: [104.20474088683795,
+                30.702932860449977],
+            // center: [0, 0, 0],
             pitch: 60,
             antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
         }));
 
         // parameters to ensure the model is georeferenced correctly on the map
-        var modelOrigin = [103.64300272883702, 29.885843850603877];
+        console.log("map", map)
+        const mercatorMatrix = map.transform.mercatorMatrix;
+        var modelOrigin = [104.16961669921875,
+            30.757768654428336];
         var modelAltitude = 0;
         var modelRotate = [Math.PI / 2, 0, 0];
 
+        var coord = new mapboxgl.MercatorCoordinate(1, 1, 0);
+        var lngLat = coord.toLngLat(); // LngLat(0, 0)
+        console.log("lnglat1111111", lngLat)
         var modelAsMercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
             modelOrigin,
             modelAltitude
         );
 
-        console.log(modelAsMercatorCoordinate, 44444);
+
+        // var selfModel = mapboxgl.MercatorCoordinate.fromLngLat(
+        //     [103.64627902302954, 29.89083669242696],
+        //     modelAltitude
+        // );
+        var selfModel = mapboxgl.MercatorCoordinate.fromLngLat(
+            [104.04327392578125,
+                30.653862130404377],
+            modelAltitude
+        );
+
+        console.log(111, modelAsMercatorCoordinate, selfModel, 422224444);
+
         // transformation parameters to position, rotate and scale the 3D model onto the map
         var modelTransform = {
             translateX: modelAsMercatorCoordinate.x,
@@ -86,6 +109,7 @@
             scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits()
         };
 
+        console.log("modelTransform", modelTransform);
         var THREE = window.THREE;
 
         // configuration of the custom layer for a 3D model per the CustomLayerInterface
@@ -96,12 +120,19 @@
             onAdd: function (map, gl) {
 
                 this.scene = new THREE.Scene();
+                var group = new THREE.Group();
 
+
+                const helper = new THREE.GridHelper(160, 10);
+                const axesHelper = new THREE.AxesHelper(1);
+
+                this.scene.add(helper);
+                this.scene.add(axesHelper)
                 const color = new THREE.Color("#093A3C")
 
-                this.scene.background = color;
+                // this.scene.background = color;
                 console.log(color, 4444);
-                this.camera = new THREE.PerspectiveCamera();
+                this.camera = new THREE.OrthographicCamera();
 
                 // create two three.js lights to illuminate the model
                 var directionalLight = new THREE.DirectionalLight(0xffffff);
@@ -115,45 +146,7 @@
 
                 // use the three.js GLTF loader to add the 3D model to the three.js scene
                 var loader = new THREE.GLTFLoader();
-                loader.load(
-                    'https://docs.mapbox.com/mapbox-gl-js/assets/34M_17/34M_17.gltf',
-                    function (gltf) {
-                        this.scene.add(gltf.scene);
-                    }.bind(this)
-                );
-                this.map = map;
 
-                // use the Mapbox GL JS map canvas for three.js
-                this.renderer = new THREE.WebGLRenderer({
-                    canvas: map.getCanvas(),
-                    context: gl,
-                    antialias: true
-                });
-
-                this.renderer.autoClear = false;
-                //在渲染时添加click事件
-                this.renderer.domElement.addEventListener('click', (e) => {
-                    console.log(this, this.camera, 555555);
-                    e.preventDefault();
-                    const { clientX, clientY } = e
-                    const x = (clientX / window.innerWidth) * 2 - 1;
-                    const y = (clientY / window.innerHeight) * 2 + 1;
-                    const mousePoint = new THREE.Vector2(x, y)
-                    const raycaster = new THREE.Raycaster();
-                    // 通过摄像机和鼠标位置更新射线
-                    raycaster.setFromCamera(mousePoint, this.camera);
-
-                    // 计算物体和射线的焦点
-                    const intersects = raycaster.intersectObjects(this.scene.children, true);
-                    for (var i = 0; i < intersects.length; i++) {
-
-                        intersects[i].object.material.color.set(0xff0000);
-
-                    }
-                    console.log(intersects)
-                });
-            },
-            render: function (gl, matrix) {
                 var rotationX = new THREE.Matrix4().makeRotationAxis(
                     new THREE.Vector3(1, 0, 0),
                     modelTransform.rotateX
@@ -166,7 +159,7 @@
                     new THREE.Vector3(0, 0, 1),
                     modelTransform.rotateZ
                 );
-                var m = new THREE.Matrix4().fromArray(matrix);
+                var m = new THREE.Matrix4().fromArray(mercatorMatrix)
                 var l = new THREE.Matrix4()
                     .makeTranslation(
                         modelTransform.translateX,
@@ -184,15 +177,227 @@
                     .multiply(rotationY)
                     .multiply(rotationZ);
 
-                this.camera.projectionMatrix = m.multiply(l);
+                // var q = new THREE.Matrix4()
+                //     .makeTranslation(
+                //         selfModel.x,
+                //         selfModel.y,
+                //         selfModel.z
+                //     )
+                //     .scale(
+                //         new THREE.Vector3(
+                //             modelTransform.scale,
+                //             -modelTransform.scale,
+                //             modelTransform.scale
+                //         )
+                //     )
+                //     .multiply(rotationX)
+                //     .multiply(rotationY)
+                //     .multiply(rotationZ);
+                // var Larr = [l, q]
+                // console.log("qqqqqqq", q.multiply(l.invert()))
+                loader.load(
+                    // 'http://127.0.0.1:5501/examples/models/radar/34M_17.glb',
+                    'https://docs.mapbox.com/mapbox-gl-js/assets/34M_17/34M_17.gltf',
+                    // 'http://127.0.0.1:5504/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb',
+                    function (gltf) {
+                        console.log(gltf.scene, 55666);
+                        const object3D = gltf.scene;
+                        let n = 100;
+                        object3D.scale.x = n
+                        object3D.scale.y = n
+                        object3D.scale.z = n
+                        object3D.applyMatrix4(l)
+                        // for (let j = 0; j < obj.children.length; j += 1) {
+                        //     obj.children[j].scale.x = n
+                        //     obj.children[j].scale.y = n
+                        //     obj.children[j].scale.z = n
+                        // }
+
+                        // const box = new THREE.BoxHelper(obj, 0xffff00);
+                        this.scene.add(object3D);
+
+
+                    }.bind(this)
+                );
+
+                this.map = map;
+
+
+                // use the Mapbox GL JS map canvas for three.js
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: map.getCanvas(),
+                    context: gl,
+                    antialias: true
+                });
+
+                console.log(gl, "glglglglg")
+                this.renderer.autoClear = false;
+                //在渲染时添加click事件
+                // this.renderer.domElement.addEventListener('click', (e) => {
+                //     console.log(e, this, this.camera, 555555);
+                //     e.preventDefault();
+                //     const { clientX, clientY } = e
+                //     const x = (clientX / window.innerWidth) * 2 - 1;
+                //     const y = (clientY / window.innerHeight) * 2 + 1;
+                //     const mousePoint = new THREE.Vector2(x, y)
+                //     const raycaster = new THREE.Raycaster();
+                //     // 通过摄像机和鼠标位置更新射线
+                //     raycaster.setFromCamera(mousePoint, this.camera);
+
+                //     // 计算物体和射线的焦点
+                //     const intersects = raycaster.intersectObjects(this.scene.children, true);
+                //     for (var i = 0; i < intersects.length; i++) {
+
+                //         intersects[i].object.material.color.set(0xff0000);
+
+                //     }
+                //     console.log(intersects)
+                // });
+            },
+            render: function (gl, matrix) {
+
+
+                // console.log(matrix, 444488777777);
+                var rotationX = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(1, 0, 0),
+                    modelTransform.rotateX
+                );
+                var rotationY = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(0, 1, 0),
+                    modelTransform.rotateY
+                );
+                var rotationZ = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(0, 0, 1),
+                    modelTransform.rotateZ
+                );
+                var l = new THREE.Matrix4()
+                    .makeTranslation(
+                        modelTransform.translateX,
+                        modelTransform.translateY,
+                        modelTransform.translateZ
+                    )
+                    .scale(
+                        new THREE.Vector3(
+                            modelTransform.scale,
+                            -modelTransform.scale,
+                            modelTransform.scale
+                        )
+                    )
+                    .multiply(rotationX)
+                    .multiply(rotationY)
+                    .multiply(rotationZ);
+                const h = 1;
+                var m = new THREE.Matrix4().fromArray(matrix).multiply(l);
+                const { mercatorMatrix, projMatrix } = map.transform;
+                // .multiply(new THREE.Matrix4().fromArray(projMatrix))
+                var n = new THREE.Matrix4().fromArray(mercatorMatrix)
+
+                // console.log("mercatorMatrix", mercatorMatrix)
+                this.camera.projectionMatrix = n
+                // console.log(this.camera, this.scene, 44)
                 this.renderer.resetState();
                 this.renderer.render(this.scene, this.camera);
                 this.map.triggerRepaint();
             }
         };
 
+
+        function model3D() {
+            let scene, renderer, camera;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera();
+
+
+            var rotationX = new THREE.Matrix4().makeRotationAxis(
+                new THREE.Vector3(1, 0, 0),
+                modelTransform.rotateX
+            );
+            var rotationY = new THREE.Matrix4().makeRotationAxis(
+                new THREE.Vector3(0, 1, 0),
+                modelTransform.rotateY
+            );
+            var rotationZ = new THREE.Matrix4().makeRotationAxis(
+                new THREE.Vector3(0, 0, 1),
+                modelTransform.rotateZ
+            );
+            // var m = new THREE.Matrix4().fromArray(matrix);
+            // var l = new THREE.Matrix4()
+            //     .makeTranslation(
+            //         modelTransform.translateX,
+            //         modelTransform.translateY,
+            //         modelTransform.translateZ
+            //     )
+            //     .scale(
+            //         new THREE.Vector3(
+            //             modelTransform.scale,
+            //             -modelTransform.scale,
+            //             modelTransform.scale
+            //         )
+            //     )
+            //     .multiply(rotationX)
+            //     .multiply(rotationY)
+            //     .multiply(rotationZ);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff)
+            directionalLight.position.set(0, -70, 100).normalize();
+
+            scene.add(directionalLight);
+
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff);
+            directionalLight2.position.set(0, 70, 100).normalize();
+            scene.add(directionalLight2);
+
+            const loader = new THREE.GLTFLoader();
+
+            loader.load(
+                'https://docs.mapbox.com/mapbox-gl-js/assets/34M_17/34M_17.gltf',
+                // 'http://127.0.0.1:5504/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb',
+                (gltf) => {
+                    console.log(gltf.scene, 55666);
+                    const object3D = gltf.scene;
+                    console.log("属性", object3D.modelViewMatrix, modelTransform)
+                    // object3D.position.x = modelTransform.translateX;
+                    // object3D.position.y = modelTransform.translateY;
+                    // object3D.position.z = modelTransform.translateZ;
+                    // object3D.scale = modelTransform.scale;
+                    // object3D.rotation.x = modelTransform.rotateX
+                    // object3D.rotation.y = modelTransform.rotateY
+                    // object3D.rotation.z = modelTransform.rotateZ
+                    // object3D.visible = true;
+                    // object3D.receiveShadow = true;
+                    // object3D.castShadow = true
+                    // object3D.matrix = l;
+                    console.info("object3D", object3D)
+                    // group.applyMatrix4(o);
+                    // group.add(object3D)
+                    scene.add(object3D);
+                }
+            );
+
+            console.log(map.getCanvas(), "canvas")
+            renderer = new THREE.WebGLRenderer({
+                canvas: map.getCanvas(),
+                context: map.getCanvas().getContext("webgl"),
+                antialias: true
+            });
+            renderer.render(scene, camera);
+        }
         map.on('style.load', function () {
             map.addLayer(customLayer);
+            console.log(map.getStyle(), "getStyle")
+            // console.log(map.getFreeCameraOptions(), "相机位置")
+            map.on("click", (e) => {
+                console.log("click", e)
+                const { lat, lng } = e.lngLat;
+                const coord = mapboxgl.MercatorCoordinate.fromLngLat({ lng, lat }, 0)
+                console.log(coord, 555555555555555555);
+            })
+            map.on("move", () => {
+                console.log("move" + Date.now())
+            })
+            map.on("resize", () => {
+                console.log("resize" + Date.now())
+            })
         });
     </script>
 

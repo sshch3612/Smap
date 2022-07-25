@@ -1,6 +1,6 @@
 {
   "name": "smapbox",
-  "version": "1.0.0",
+  "version": "1.0.21",
   "main": "lib/smap.cjs.js",
   "module": "lib/smap.esm.js",
   "browser": "lib/smap.umd.js",

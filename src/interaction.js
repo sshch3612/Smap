@@ -193,7 +193,7 @@ export const interaction = (Smap) => {
                 "icon-size": [
                     "interpolate",
                     ["linear"], ["zoom"],
-                    9, 1,
+                    9, .2,
                     14, 1
                 ],
             }

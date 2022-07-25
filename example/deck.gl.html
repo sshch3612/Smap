@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+
+        }
+
+        #app {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div>deckgl 示例</div>
+    <div id="app"></div>
+</body>
+<script>
+
+    const Instance = new deck.Deck({
+        parent: document.querySelector("#app"),
+        // id: "app11",
+        width: "50%",
+        height: "50%",
+        // parameters:{},//webgl
+        initialViewState: {
+            longitude: 104.16961669921875,
+            latitude: 30.757768654428336,
+            zoom: 15
+        },
+        controller: true,
+        layers: [
+            new deck.ScatterplotLayer({
+                data: [
+                    { position: [104.16961669921875, 30.757768654428336], color: [255, 0, 0], radius: 100 }
+                ],
+                getColor: d => d.color,
+                getRadius: d => d.radius
+            })
+        ]
+    });
+    console.log(Instance, 5555);
+</script>
+
+</html>

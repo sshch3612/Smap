@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css" rel="stylesheet" />
+</head>
+<style>
+    #container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    #container>* {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body>
+    <div id="container">
+        <div id="map"></div>
+        <canvas id="deck-canvas"></canvas>
+    </div>
+</body>
+<script type="text/javascript">
+    const { MapboxLayer, ScatterplotLayer } = deck;
+
+    const INITIAL_VIEW_STATE = {
+        latitude: 30.757768654428336,
+        longitude: 104.16961669921875,
+        zoom: 15,
+        bearing: 0,
+        pitch: 30
+    };
+
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic3NoY2giLCJhIjoiY2s4ZTQ1MmR3MGdjODNucDdxa3N5cTFsMSJ9.Nsv26T0aTiOeB-oMj0oPGA';
+    const myDeckLayer = new MapboxLayer({
+        id: 'my-scatterplot',
+        type: ScatterplotLayer,
+        data: [
+            { position: [7.5, 58], color: [255, 0, 0], radius: 100 }
+        ],
+        getColor: d => d.color,
+        getRadius: d => d.radius
+    });
+
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v9',
+        interactive: false,
+        center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+        zoom: INITIAL_VIEW_STATE.zoom,
+        bearing: INITIAL_VIEW_STATE.bearing,
+        pitch: INITIAL_VIEW_STATE.pitch,
+        antialias: true // Mapbox disables WebGL's antialiasing by default
+    });
+
+    map.on('load', () => {
+        // map.addLayer(myDeckLayer);
+        // console.log(map.getStyle())
+        // initDeck()
+        const marker1 = new mapboxgl.Marker()
+            .setLngLat([104.16961669921875, 30.757768654428336])
+            .addTo(map);
+
+        // Create a default Marker, colored black, rotated 45 degrees.
+        const marker2 = new mapboxgl.Marker({ color: 'black', rotation: 45 })
+            .setLngLat([104.16961669921875, 31.757768654428336])
+            .addTo(map);
+        map.on("click", () => {
+            alert(111)
+        })
+    });
+    // function initDeck() {
+    new deck.Deck({
+        // gl: document.querySelector(".mapboxgl-canvas").getContext("webgl"),
+        canvas: "deck-canvas",
+        height: "100%",
+        width: "100%",
+        initialViewState: INITIAL_VIEW_STATE,
+        controller: true,
+        onViewStateChange: ({ viewState }) => {
+            map.jumpTo({
+                center: [viewState.longitude, viewState.latitude],
+                zoom: viewState.zoom,
+                bearing: viewState.bearing,
+                pitch: viewState.pitch
+            });
+        },
+        // onClick: (info, event) => {
+        //     console.log(1111111, info, event)
+        // },
+        layers: [
+            new deck.ScatterplotLayer({
+                data: [
+                    { position: [104.16961669921875, 30.757768654428336], color: [255, 0, 0], radius: 100 }
+                ],
+                getColor: d => d.color,
+                getRadius: d => d.radius,
+                pickable: true,
+                onClick: (info, event) => {
+                    console.log(info, event)
+                }
+            }),
+            new deck.GeoJsonLayer({
+                data: {
+                    "type": "FeatureCollection",
+                    "features": [
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "name": "33333"
+                            },
+                            "geometry": {
+                                "type": "LineString",
+                                "coordinates": [
+                                    [
+                                        104.16961669921875,
+                                        30.757768654428336
+                                    ],
+                                    [
+                                        104.04327392578125,
+                                        30.653862130404377
+                                    ],
+
+                                    [
+                                        104.26094055175781,
+                                        30.74773711283919
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                },
+                stroked: true,
+                getLineColor: [255, 0, 0],
+                getLineWidth: 3,
+                lineWidthUnits: 'pixels'
+            })
+        ]
+    });
+    // }
+</script>
+
+</html>

@@ -1,0 +1,22 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates":  [
+                    104.06182164612454,
+                    31.069404880379636
+                ]
+            },
+            "properties": {
+                "id": "1432192485995646978",
+                "element": "架空线路",
+                "elementType": "1",
+                "elementId": "1"
+            },
+            "id": "1432192485995646978"
+        }
+    ]
+}

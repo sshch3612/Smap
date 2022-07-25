@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/deck.gl@^8.1.0/dist.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
+
+</head>
+<style>
+    #map {
+        width: 100vw;
+        height: 100vh;
+    }
+</style>
+
+<body>
+    <div id="map"></div>
+</body>
+<script type="text/javascript">
+    const { MapboxLayer, ScatterplotLayer, GeoJsonLayer } = deck;
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic3NoY2giLCJhIjoiY2s4ZTQ1MmR3MGdjODNucDdxa3N5cTFsMSJ9.Nsv26T0aTiOeB-oMj0oPGA';
+    const myDeckLayer = new MapboxLayer({
+        id: 'my-scatterplot',
+        type: ScatterplotLayer,
+        data: [
+            { position: [104.20474088683795, 30.702932860449977], color: [255, 0, 0], radius: 100 }
+        ],
+        getColor: d => d.color,
+        getRadius: d => d.radius
+    });
+
+    const myGeoLayer = new MapboxLayer({
+        id: 'my-scatterplot1',
+        type: GeoJsonLayer,
+        data: {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "33333"
+                    },
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [
+                                104.16961669921875,
+                                30.757768654428336
+                            ],
+                            [
+                                104.04327392578125,
+                                30.653862130404377
+                            ],
+
+                            [
+                                104.26094055175781,
+                                30.74773711283919
+                            ]
+                        ]
+                    }
+                }
+            ]
+        },
+        pointType: 'circle',
+        opacity: 0.8,
+        stroked: false,
+        filled: true,
+        extruded: true,
+        wireframe: true,
+
+        getElevation: f => Math.sqrt(f.properties.valuePerSqm) * 10,
+        getFillColor: f => colorScale(f.properties.growth),
+        getLineColor: [255, 255, 255],
+
+        pickable: true
+    })
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v9',
+        center: [104.20474088683795, 30.702932860449977],// [104.16961669921875, 30.757768654428336],
+        zoom: 15,
+        antialias: true // Mapbox disables WebGL's antialiasing by default
+    });
+
+    map.on('load', () => {
+        map.addLayer(myDeckLayer);
+        map.addLayer(myGeoLayer)
+        map.on("click", "my-scatterplot", (e) => {
+            console.log(e, 44)
+        })
+        console.log(map.getStyle())
+    });
+</script>
+
+</html>

@@ -6,6 +6,7 @@
     <title>Add an animated icon to the map</title>
     <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
     <script src="../lib/smap.umd.js"></script>
     <link href="../lib/smap.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
@@ -43,42 +44,115 @@
             <button type="button" class="btn btn-secondary" onclick="handleCircle()">测范围</button>
             <button type="button" class="btn btn-secondary" onclick="handleCallback()">事件回调</button>
             <button type="button" class="btn btn-secondary" onclick="handleBox()">画矩形</button>
+            <button type="button" class="btn btn-secondary" onclick="handleUpdateData()">更新数据</button>
         </div>
     </div>
 
 
     <script>
+        const { ScatterplotLayer, MapboxLayer, GeoJsonLayer } = deck;
+        console.log("==========================", deck)
+        let mapboxInstance;
 
+
+        // const myDeckLayer = new MapboxLayer({
+        //     id: 'my-scatterplot',
+        //     type: ScatterplotLayer,
+        //     data: [
+        //         {
+        //             position: [104.20474088683795,
+        //                 30.702932860449977], size: 100
+        //         }
+        //     ],
+        //     // getPosition: d => d.position,
+        //     pickable: true,
+        //     getRadius: d => d.size,
+        //     getFillColor: [255, 0, 0],
+        //     onClick: (info, event) => {
+        //         console.log(info, event)
+        //         const marker2 = new mapboxgl.Marker({ color: 'black', rotation: 45 })
+        //             .setLngLat([104.16961669921875, 31.757768654428336])
+        //             .addTo(map);
+        //     }
+        // });
+        let Data = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "33333"
+                    },
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [
+                                104.16961669921875,
+                                30.757768654428336
+                            ],
+                            [
+                                104.04327392578125,
+                                30.653862130404377
+                            ],
+
+                            [
+                                104.26094055175781,
+                                30.74773711283919
+                            ]
+                        ]
+                    }
+                }
+            ]
+        };
+        const myDeckLayer = new MapboxLayer({
+            id: "ssc",
+            type: GeoJsonLayer,
+            data: Data,
+            stroked: true,
+            getLineColor: [255, 0, 0],
+            getLineWidth: 3,
+            lineWidthUnits: 'pixels',
+            pickable: true,
+            onClick: (info, event) => {
+                console.log(info, event)
+                alert(1)
+            }
+        })
         var map = new Smap.Map({
             id: "map"
         })
         let Obj = null;
-        console.log(map, 88777);
 
         let dataPoint = [];
         map.on('styleimagemissing', function (e) {
             console.log('A styleimagemissing event occurred.', e)
             if (e.id === 'dynamic-point') {
-                map.loadDynamicRotateImg({ id: 'dynamic-point' })
+                map.loadDynamicPoint({ id: 'dynamic-point' })
             }
         })
         map.on("load", function () {
             // map.loadDynamicGradient({ id: "dynamic-point" })
             map.loadDynamicDashed({ id: "test" });
+            mapboxInstance = map.smap;
+
+            console.info("mapboxInstance", mapboxInstance);
+            mapboxInstance.addLayer(myDeckLayer);
+            console.log(mapboxInstance.__deck, 444333)
+            console.log(mapboxInstance.getStyle(), "style")
             // map.loadOneImage("point", "../src/assets/point.png")
             const turf = Smap.Turf;
-            map.takeCoordinates({
-                onEnd: function (e) {
-                    console.log(122222223, e);
-                }
-            })
-            map.on("click", "testdw", (e) => {
+            // map.takeCoordinates({
+            //     onEnd: function (e) {
+            //         console.log(122222223, e);
+            //     }
+            // })
+            map.on("click", "test", (e) => {
                 const feature = e.features[0];
                 console.log(e, feature, 55555);
             })
 
             map.on("resize", () => {
-                console.log("resize", map)
+                // console.log("resize", map)
             })
             // map.on("click", (e) => {
             //     console.log(e, e.target, 5555);
@@ -159,6 +233,36 @@
             map.drawBox();
         }
 
+        function handleUpdateData() {
+            console.log("myDeckLayer", myDeckLayer)
+            myDeckLayer.setProps({
+                data: {
+                    "type": "FeatureCollection",
+                    "features": [
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "name": "33333"
+                            },
+                            "geometry": {
+                                "type": "LineString",
+                                "coordinates": [
+                                    [
+                                        104.16961669921875,
+                                        30.757768654428336
+                                    ],
+                                    [
+                                        104.04327392578125,
+                                        30.653862130404377
+                                    ],
+
+                                ]
+                            }
+                        }
+                    ]
+                }
+            })
+        }
     </script>
 
 </body>

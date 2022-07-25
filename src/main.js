@@ -1,7 +1,5 @@
 
 
-// import { Scene } from "@antv/l7";
-// import { Mapbox } from "@antv/l7-maps";
 import * as  layerGrounp from "./layergroups";
 
 import { initMixin } from "./init";

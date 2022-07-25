@@ -19,7 +19,7 @@ export const initMixin = (Smap) => {
         // /** 文本是否标注*/
         // this.istextMark = false;
         /** 地图底图类型集锦*/
-        vm.smap = initLoadMap(options);
+        vm.smap = gaodeMap(options);
     };
 
     interaction(Smap);
@@ -75,7 +75,7 @@ const gaodeMap = (options) => {
     const { id, layerNames, center, zoom, minZoom, maxZoom } = options;
     return new mapboxgl.Map({
         container: id || "map",
-        zoom: 9,
+        zoom: 15,
         center: [104.20474088683795,
             30.702932860449977],
         // style:require("./assets/style.json"),
@@ -99,9 +99,13 @@ const gaodeMap = (options) => {
                 "dydw": {
                     type: "vector",
                     tiles: [
-                        "http://192.168.1.87:8082/map/deyang/dw/{z}/{x}/{y}.pbf"
+                        "http://182.150.58.166:18082/map/deyang/dw/{z}/{x}/{y}.pbf"
                     ],
                     tileSize: 512
+                },
+                "test": {
+                    type: "geojson",
+                    data: require("./test.json")
                 }
             },
             sprite: "http://127.0.0.1:5501/src/assets/sprite",
@@ -111,34 +115,91 @@ const gaodeMap = (options) => {
                     type: 'raster',
                     source: "base",
                 },
-                {
-                    id: "testdw",
-                    type: "line",
-                    source: "dydw",
-                    "source-layer": "dydw",
-                    minzoom: 8,
-                    maxzoom: 22,
-                    filter: [
-                        "match",
-                        [
-                            "geometry-type"
-                        ],
-                        [
-                            "LineString"
-                        ],
-                        true,
-                        false
-                    ],
-                    paint: {
-                        "line-color": "red",
-                        "line-width": 5,
-                        "line-opacity": 0.5,
-                    },
-                    layout: {
-                        "line-cap": "butt",
-                        "line-join": "round",
-                    }
-                }
+                // {
+                //     id: "testdw1",
+                //     type: "line",
+                //     source: "dydw",
+                //     "source-layer": "dw",
+                //     minzoom: 8,
+                //     maxzoom: 22,
+                //     filter: [
+                //         "match",
+                //         [
+                //             "geometry-type"
+                //         ],
+                //         [
+                //             "LineString"
+                //         ],
+                //         true,
+                //         false
+                //     ],
+                //     paint: {
+                //         "line-color": "red",
+                //         "line-width": 2,
+                //         "line-opacity": 0.4,
+                //     },
+                //     layout: {
+                //         "line-cap": "butt",
+                //         "line-join": "round",
+                //     }
+                // },
+                // {
+                //     id: "test",
+                //     type: "line",
+                //     source: "test",
+                //     paint: {
+                //         "line-color": "red",
+                //         "line-width": 4,
+                //     },
+                //     layout:{
+                //         "line-sort-key":3
+                //     }
+                // },
+                // {
+                //     id: "test1",
+                //     type: "line",
+                //     source: "test",
+                //     paint: {
+                //         "line-color": "blue",
+                //         "line-width": 4,
+                //     },
+                //     layout:{
+                //         "line-sort-key":6
+                //     }
+                // }
+                // {
+                //     id: "testdw",
+                //     type: "line",
+                //     source: "dydw",
+                //     // "source-layer": "dw",
+                //     minzoom: 8,
+                //     maxzoom: 22,
+                //     filter: [
+                //         "match",
+                //         [
+                //             "geometry-type"
+                //         ],
+                //         [
+                //             "LineString"
+                //         ],
+                //         true,
+                //         false
+                //     ],
+                //     paint: {
+                //         'line-pattern': `test`,
+                //         "line-color": "red",
+                //         "line-width": 2,
+                //         // "line-dasharray":[2, 2],
+                //         "line-dasharray-transition": {
+                //             "duration": 100,
+                //             "delay": 0
+                //         },
+                //     },
+                //     layout: {
+                //         "line-cap": "butt",
+                //         "line-join": "round",
+                //     }
+                // }
                 // {
                 //     id: "testdw",
                 //     type: "symbol",
