@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>为地图添加图标</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id='map'></div>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic3NoY2giLCJhIjoiY2s4ZTQ1MmR3MGdjODNucDdxa3N5cTFsMSJ9.Nsv26T0aTiOeB-oMj0oPGA';
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: './style.json'
+        });
+
+        map.on('load', function () {
+            map.loadImage('https://upload.jianshu.io/users/upload_avatars/933843/f96faf9bd9a5.jpg?imageMogr2/auto-orient/strip|imageView2/1/w/80/h/80/format/webp', function (error, image) {
+                if (error) throw error;
+                map.addImage('cat', image);
+                // map.addLayer({
+                //     "id": "points",
+                //     "type": "symbol",
+                //     // "source": {
+                //     //     "type": "geojson",
+                //     //     "data": "http://127.0.0.1:5503/example/city.json"
+                //     // },
+                //     "source":"cityjson",
+                //     // "layout": {
+                //     //     "icon-image": "cat",
+                //     //     "icon-size": 0.25
+                //     // }
+                //     "layout": {
+                //         "text-field": "{name}",
+                //         "text-font": ["Noto Sans Regular"],
+                //         "text-letter-spacing": 0.1,
+                //         "text-max-width": 9,
+                //         "text-size": {
+                //             "property": "",
+                //             "type": "exponential",
+                //             "base": 1.2,
+                //             "stops": [
+                //                 [{ "zoom": 12, "value": 0 }, 10],
+                //                 [{ "zoom": 15, "value": 0 }, 14]
+                //             ]
+                //         },
+                //         "text-transform": "uppercase",
+                //         "visibility": "visible",
+                //         "icon-size": 12
+                //     },
+                //     "paint": { "text-color": "rgba(146, 189, 255, 1)", "text-halo-width": 1.2 }
+                // });
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>
